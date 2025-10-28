@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="src\Engine">
+      <UniqueIdentifier>{2d12e2a9-2b6a-4707-8aee-b2a699140d4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Render">
+      <UniqueIdentifier>{fcc45c99-8470-4518-9758-f594071083fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Render\API">
+      <UniqueIdentifier>{4cdda404-078d-4510-8c39-237907fe2bca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Render\Vulkan">
+      <UniqueIdentifier>{6d863254-6a49-401e-a578-5ba5958cbaaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Render\D3D12">
+      <UniqueIdentifier>{9bf02709-e014-4ad8-be5f-3fd621422a03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\System">
+      <UniqueIdentifier>{a491a157-3f51-441e-9aac-496be866c62a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\System\Win32">
+      <UniqueIdentifier>{fc96045a-a266-4325-8def-8067cc5e6862}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\System\API">
+      <UniqueIdentifier>{56a862a7-ca08-4f80-8ab0-361d9a92a1de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\System\Linux">
+      <UniqueIdentifier>{3767fbc3-0565-407b-954a-50e59fe4dad2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Maths">
+      <UniqueIdentifier>{86fee1cd-f931-4f56-a7e6-9b971195a7a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="include\Engine">
+      <UniqueIdentifier>{10a23f8c-3563-4723-a5f0-afa2c2df0d70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\Render">
+      <UniqueIdentifier>{458b04bf-3174-4281-be3d-df68f74bc04a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\Render\API">
+      <UniqueIdentifier>{bbcccfb8-6efd-48e4-b4a1-54da1e7179d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\Render\Vulkan">
+      <UniqueIdentifier>{8f003e84-eb38-497c-863a-1c09002d6be4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\Render\D3D12">
+      <UniqueIdentifier>{e7b2eb86-054c-40d2-9d73-7a70ddbb249c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\System">
+      <UniqueIdentifier>{f2d4cc88-6e3e-4455-91b1-655e0625c5e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\System\Win32">
+      <UniqueIdentifier>{d4210047-3fb4-4f6c-b8dd-62510c4bba74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\System\API">
+      <UniqueIdentifier>{65462a18-d9af-494f-bf72-65e757027511}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\System\Linux">
+      <UniqueIdentifier>{b18760c7-3965-4496-a655-8f2b5bac8a21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\Maths">
+      <UniqueIdentifier>{75f0afa9-5b9b-474a-8584-00d986ad6a85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\Engine\Core">
+      <UniqueIdentifier>{a520ae85-37ea-4c82-b415-669af0afcc95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Core">
+      <UniqueIdentifier>{3bf5a684-d297-4bb8-9b26-c10083f5e018}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\System\API\Window.cpp">
+      <Filter>src\Engine\System\API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\System\Windows\Win32Window.cpp">
+      <Filter>src\Engine\System\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\API\GraphicsDevice.cpp">
+      <Filter>src\Engine\Render\API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12GraphicsDevice.cpp">
+      <Filter>src\Engine\Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Vulkan\VulkanGraphicsDevice.cpp">
+      <Filter>src\Engine\Render\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\System\API\Window.h">
+      <Filter>include\Engine\System\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\System\Windows\Win32Window.h">
+      <Filter>include\Engine\System\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\GraphicsDevice.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12GraphicsDevice.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanGraphicsDevice.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pch.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Types.h">
+      <Filter>include\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Slipstream.h">
+      <Filter>include\Engine</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
