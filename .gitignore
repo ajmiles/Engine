@@ -41,4 +41,5 @@
 *.dwo
 /.vs
 /Samples/HelloWindow/bin/Intermediate/x64/Debug
-/Slipstream
+/Slipstream/.vs/Slipstream
+/Slipstream/Slipstream/x64/Debug
