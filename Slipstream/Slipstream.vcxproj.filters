@@ -95,6 +95,42 @@
     <ClCompile Include="src\pch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\API\CommandQueue.cpp">
+      <Filter>src\Engine\Render\API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Vulkan\VulkanCommandQueue.cpp">
+      <Filter>src\Engine\Render\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12SwapChain.cpp">
+      <Filter>src\Engine\Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\API\SwapChain.cpp">
+      <Filter>src\Engine\Render\API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Vulkan\VulkanCommandList.cpp">
+      <Filter>src\Engine\Render\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12CommandList.cpp">
+      <Filter>src\Engine\Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12CommandAllocator.cpp">
+      <Filter>src\Engine\Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Vulkan\VulkanCommandAllocator.cpp">
+      <Filter>src\Engine\Render\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12CommandQueue.cpp">
+      <Filter>src\Engine\Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\API\Fence.cpp">
+      <Filter>src\Engine\Render\API</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12Fence.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Vulkan\VulkanFence.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\System\API\Window.h">
@@ -120,6 +156,51 @@
     </ClInclude>
     <ClInclude Include="include\Slipstream.h">
       <Filter>include\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\CommandQueue.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanCommandQueue.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\SwapChain.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12CommandQueue.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12SwapChain.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\CommandList.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12CommandList.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanSwapChain.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanCommandList.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\CommandAllocator.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12CommandAllocator.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanCommandAllocator.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\Fence.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12Fence.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanFence.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

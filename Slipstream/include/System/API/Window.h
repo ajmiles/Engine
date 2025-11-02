@@ -9,15 +9,17 @@ namespace Slipstream
 		{
 		public:
 			virtual ~IWindowImpl() = default;
+
+            virtual bool Update() const = 0;
+            virtual uint64_t GetHandle() const = 0;
 		};
 
 		struct WindowDesc
 		{
 			uint width;
 			uint height;
-			bool fullscreen;
 
-			WindowDesc() : width(1280), height(720), fullscreen(false)
+			WindowDesc() : width(1280), height(720)
 			{
 			}
 		};
@@ -28,6 +30,10 @@ namespace Slipstream
 			Window();
 			Window(const WindowDesc& desc);
 			~Window() = default;
+
+            bool Update() const;
+            uint64_t GetHandle() const;
+
 		private:
 			IWindowImpl* m_Impl;
 		};
