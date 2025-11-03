@@ -21,7 +21,6 @@ namespace Slipstream
 
             SwapChain        CreateSwapChain(const SwapChainDesc& desc) override;
             CommandQueue     GetCommandQueue(CommandQueueType type, uint index) override;
-            CommandList      CreateCommandList(const CommandListDesc& desc) override;
             CommandAllocator CreateCommandAllocator(const CommandAllocatorDesc& desc) override;
             Fence            CreateFence(const FenceDesc& desc) override;
 

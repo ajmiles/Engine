@@ -41,7 +41,6 @@ namespace Slipstream
             virtual ~IGraphicsDeviceImpl() = default;
             virtual CommandQueue     GetCommandQueue(CommandQueueType type, uint index) = 0;
             virtual SwapChain        CreateSwapChain(const SwapChainDesc& desc) = 0;
-            virtual CommandList      CreateCommandList(const CommandListDesc& desc) = 0;
             virtual CommandAllocator CreateCommandAllocator(const CommandAllocatorDesc& desc) = 0;
             virtual Fence            CreateFence(const FenceDesc& desc) = 0;
         };
@@ -55,7 +54,6 @@ namespace Slipstream
 
             CommandQueue     GetCommandQueue(CommandQueueType type, uint index);
             SwapChain        CreateSwapChain(const SwapChainDesc& desc);
-            CommandList      CreateCommandList(const CommandListDesc& desc);
             CommandAllocator CreateCommandAllocator(const CommandAllocatorDesc& desc);
             Fence            CreateFence(const FenceDesc& desc);
 

@@ -9,19 +9,14 @@
 
 using namespace Slipstream::Render;
 
-// TODO. Put this somewhere common?
-static D3D12_COMMAND_LIST_TYPE ToD3DType(CommandAllocatorType type)
-{
-    switch (type)
-    {
-    case CommandAllocatorType::Compute: return D3D12_COMMAND_LIST_TYPE_COMPUTE;
-    case CommandAllocatorType::Copy:    return D3D12_COMMAND_LIST_TYPE_COPY;
-    default:                            return D3D12_COMMAND_LIST_TYPE_DIRECT;
-    }
-}
-
 D3D12GraphicsDeviceImpl::D3D12GraphicsDeviceImpl(const GraphicsDeviceDesc& desc)
 {
+    // Create an IDXGIFactory for adapter enumeration, swap chain creation etc
+	HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&m_dxgiFactory));
+
+    if(FAILED(hr))
+		throw std::runtime_error("Failed to create DXGI Factory");
+
     // Enable the D3D12 debug layer if requested.
     if(desc.Flags & GraphicsDeviceFlags::Debug)
     {
@@ -33,7 +28,7 @@ D3D12GraphicsDeviceImpl::D3D12GraphicsDeviceImpl(const GraphicsDeviceDesc& desc)
         }
     }
 
-    HRESULT hr = D3D12CreateDevice(
+    hr = D3D12CreateDevice(
         nullptr,
         D3D_FEATURE_LEVEL_11_0,
         IID_PPV_ARGS(&m_device)
@@ -81,22 +76,54 @@ CommandQueue D3D12GraphicsDeviceImpl::GetCommandQueue(CommandQueueType type, uin
     {
     default:
     case CommandQueueType::Graphics:
-        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_GraphicsQueues[index]));
+        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_GraphicsQueues[index]), type);
     case CommandQueueType::Compute:
-        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_ComputeQueues[index]));
+        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_ComputeQueues[index]), type);
     case CommandQueueType::Copy:
-        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_CopyQueues[index]));
+        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_CopyQueues[index]), type);
     }
 }
 
 SwapChain D3D12GraphicsDeviceImpl::CreateSwapChain(const SwapChainDesc& desc)
 {
+    DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+    swapChainDesc.Width = 0; // Use automatic sizing.
+    swapChainDesc.Height = 0; // Use automatic sizing.
+    swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    swapChainDesc.Stereo = FALSE;
+    swapChainDesc.SampleDesc.Count = 1;
+    swapChainDesc.SampleDesc.Quality = 0;
+    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapChainDesc.BufferCount = desc.BufferCount;
+    swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+
+	IDXGISwapChain1* dxgiSwapChain = nullptr;
+	IDXGIFactory2* dxgiFactory2 = nullptr;
+	// Query for IDXGIFactory2 to use CreateSwapChainForHwnd
+	m_dxgiFactory->QueryInterface(IID_PPV_ARGS(&dxgiFactory2));
+
+	D3D12CommandQueueImpl* presentQueueImpl = static_cast<D3D12CommandQueueImpl*>(desc.PresentQueue.m_Impl);
+
+    HRESULT hr = dxgiFactory2->CreateSwapChainForHwnd(
+        presentQueueImpl->m_Queue,
+        (HWND)(desc.WindowHandle),
+        &swapChainDesc,
+        nullptr,
+        nullptr,
+        &dxgiSwapChain
+    );
+
+    if(FAILED(hr))
+		throw std::runtime_error("Failed to create D3D12 swap chain");
+
     // Create the swap chain
-    D3D12SwapChainImpl* swapChainImpl = new D3D12SwapChainImpl(desc);
+    D3D12SwapChainImpl* swapChainImpl = new D3D12SwapChainImpl(dxgiSwapChain);
 
     return SwapChain(swapChainImpl);
 }
-
+/*
 CommandList D3D12GraphicsDeviceImpl::CreateCommandList(const CommandListDesc& desc)
 {
     ID3D12GraphicsCommandList* d3dCommandList = nullptr;
@@ -115,7 +142,7 @@ CommandList D3D12GraphicsDeviceImpl::CreateCommandList(const CommandListDesc& de
 
     return CommandList(static_cast<ICommandListImpl*>(impl));
 }
-
+*/
 CommandAllocator D3D12GraphicsDeviceImpl::CreateCommandAllocator(const CommandAllocatorDesc& desc)
 {
     ID3D12CommandAllocator* allocator = nullptr;
@@ -128,12 +155,24 @@ CommandAllocator D3D12GraphicsDeviceImpl::CreateCommandAllocator(const CommandAl
     if (FAILED(hr))
         throw std::runtime_error("Failed to create D3D12 command allocator");
 
-    D3D12CommandAllocatorImpl* impl = new D3D12CommandAllocatorImpl(allocator);
+    ID3D12GraphicsCommandList* d3dCommandList = nullptr;
+
+    hr = m_device->CreateCommandList1(
+        0,
+        ToD3DType(static_cast<CommandAllocatorType>(desc.Type)),
+        D3D12_COMMAND_LIST_FLAG_NONE,
+        IID_PPV_ARGS(&d3dCommandList)
+    );
+
+    if (FAILED(hr))
+        throw std::runtime_error("Failed to create D3D12 command list");
+
+    D3D12CommandAllocatorImpl* impl = new D3D12CommandAllocatorImpl(allocator, d3dCommandList);
 
     return CommandAllocator(static_cast<CommandAllocatorImpl*>(impl));
 }
 
-Fence D3D12GraphicsDeviceImpl::CreateFence(const FenceDesc& desc)
+Fence D3D12GraphicsDeviceImpl::CreateFence(const FenceDesc&)
 {
     ID3D12Fence* fence = nullptr;
     HRESULT hr = m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));

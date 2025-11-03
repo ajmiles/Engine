@@ -14,6 +14,9 @@ namespace Slipstream::Render
         }
 
         void ExecuteCommandList(class CommandList& commandList) override;
+		void SignalFence(Fence& fence, uint64 value) override;
+
+		void Present(class SwapChain& swapChain, PresentDesc& desc) override;
 
         ID3D12CommandQueue* m_Queue = nullptr;
 

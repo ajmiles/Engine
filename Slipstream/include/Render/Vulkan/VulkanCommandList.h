@@ -7,12 +7,15 @@ namespace Slipstream::Render
     class VulkanCommandListImpl : public ICommandListImpl
     {
     private:
-        VulkanCommandListImpl(const CommandListDesc& desc);
+        VulkanCommandListImpl();
         ~VulkanCommandListImpl();
 
-        void Reset(CommandAllocator& allocator) override;
         void Close() override;
 
+		vk::CommandBuffer m_CommandBuffer;
+
         friend class VulkanGraphicsDeviceImpl;
+        friend class VulkanCommandAllocatorImpl;
+		friend class VulkanCommandQueueImpl;
     };
 }

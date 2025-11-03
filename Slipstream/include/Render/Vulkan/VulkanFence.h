@@ -10,12 +10,21 @@ namespace Slipstream::Render
         ~VulkanFenceImpl() override;
 
     private:
-        VulkanFenceImpl() = default;
+        VulkanFenceImpl(vk::Device device, vk::Semaphore semaphore)
+            : m_Device(device), m_Semaphore(semaphore) {}
+
+        uint64_t GetCompletedValue() const override
+        {
+            uint64_t value;
+			vkGetSemaphoreCounterValue(m_Device, m_Semaphore, &value);
+			return value;
+        }
 
     private:
-        VkFence m_Fence = VK_NULL_HANDLE;
+        VkSemaphore m_Semaphore = VK_NULL_HANDLE;
         VkDevice m_Device = VK_NULL_HANDLE;
 
         friend class VulkanGraphicsDeviceImpl;
+		friend class VulkanCommandQueueImpl;
     };
 }

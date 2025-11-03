@@ -12,6 +12,7 @@ namespace Slipstream::Render
     {
     public:
         virtual ~FenceImpl() = default;
+		virtual uint64_t GetCompletedValue() const = 0;
     };
 
     // Non-owning lightweight handle
@@ -26,7 +27,10 @@ namespace Slipstream::Render
         Fence(Fence&& other) noexcept;
         Fence& operator=(Fence&& other) noexcept;
 
-        FenceImpl* GetImpl() { return m_Impl; }
+        uint64_t GetCompletedValue() const
+        {
+			return m_Impl->GetCompletedValue();
+        }
 
     private:
         explicit Fence(FenceImpl* impl) noexcept;
@@ -36,5 +40,8 @@ namespace Slipstream::Render
 
         friend class D3D12GraphicsDeviceImpl;
         friend class VulkanGraphicsDeviceImpl;
+
+		friend class D3D12CommandQueueImpl;
+		friend class VulkanCommandQueueImpl;
     };
 }

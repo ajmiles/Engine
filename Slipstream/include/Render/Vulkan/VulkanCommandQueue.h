@@ -13,6 +13,8 @@ namespace Slipstream::Render
         ~VulkanCommandQueueImpl() override = default;
 
         void ExecuteCommandList(class CommandList& commandList) override;
+		void SignalFence(class Fence& fence, uint64 value) override;
+		void Present(class SwapChain& swapChain, PresentDesc& desc) override;
 
         vk::Queue m_Queue;
     };

@@ -14,7 +14,11 @@
 #endif
 
 #if defined(COMPILE_VULKAN_SUPPORT)
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_win32.h>
 #endif
 
 #include <stdexcept>

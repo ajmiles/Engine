@@ -21,6 +21,7 @@ namespace Slipstream::Render
     {
     public:
         virtual ~CommandAllocatorImpl() = default;
+        virtual ICommandListImpl* AllocateCommandList() = 0;
         virtual void Reset() = 0;
     };
 
@@ -36,6 +37,7 @@ namespace Slipstream::Render
 
         explicit operator bool() const noexcept { return m_Impl != nullptr; }
 
+		CommandList AllocateCommandList() { return CommandList(m_Impl->AllocateCommandList()); }
         void Reset() { m_Impl->Reset(); }
 
     private:

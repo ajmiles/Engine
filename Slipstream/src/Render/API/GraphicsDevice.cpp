@@ -39,11 +39,6 @@ SwapChain GraphicsDevice::CreateSwapChain(const SwapChainDesc& desc)
     return m_Impl->CreateSwapChain(desc);
 }
 
-CommandList GraphicsDevice::CreateCommandList(const CommandListDesc& desc)
-{
-    return m_Impl->CreateCommandList(desc);
-}
-
 CommandAllocator GraphicsDevice::CreateCommandAllocator(const CommandAllocatorDesc& desc)
 {
     return m_Impl->CreateCommandAllocator(desc);

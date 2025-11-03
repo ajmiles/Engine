@@ -16,9 +16,15 @@ namespace Slipstream::Render
         {
         }
 
+        uint64_t GetCompletedValue() const override
+        {
+			return m_Fence->GetCompletedValue();
+        }
+
     private:
         ID3D12Fence* m_Fence = nullptr;
 
         friend class D3D12GraphicsDeviceImpl;
+		friend class D3D12CommandQueueImpl;
     };
 }

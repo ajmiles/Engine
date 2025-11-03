@@ -6,23 +6,10 @@ namespace Slipstream::Render
 {
     class CommandAllocator;
 
-    enum class CommandListType
-    {
-        Graphics,
-        Compute,
-        Copy
-    };
-
-    struct CommandListDesc
-    {
-        CommandListType Type = CommandListType::Graphics;
-    };
-
     class ICommandListImpl
     {
     public:
         virtual ~ICommandListImpl() = default;
-        virtual void Reset(CommandAllocator& allocator) = 0;
         virtual void Close() = 0;
     };
 
@@ -38,7 +25,6 @@ namespace Slipstream::Render
 
         explicit operator bool() const noexcept { return m_Impl != nullptr; }
 
-        void Reset(CommandAllocator& allocator) { if (m_Impl) m_Impl->Reset(allocator); }
         void Close()        { if (m_Impl) m_Impl->Close(); }
 
     private:
@@ -49,8 +35,11 @@ namespace Slipstream::Render
 
         friend class D3D12GraphicsDeviceImpl;
         friend class VulkanGraphicsDeviceImpl;
-        friend class GraphicsDevice;
+        friend class CommandAllocator;
 
         friend class D3D12CommandQueueImpl;
+        friend class D3D12CommandAllocatorImpl;
+
+        friend class VulkanCommandQueueImpl;
     };
 }

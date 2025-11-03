@@ -38,6 +38,10 @@ namespace Slipstream::Render
 
         friend class D3D12GraphicsDeviceImpl;
         friend class VulkanGraphicsDeviceImpl;
+        
         friend class GraphicsDevice;
+
+		friend class D3D12CommandQueueImpl;
+        friend class VulkanCommandQueueImpl;
     };
 }

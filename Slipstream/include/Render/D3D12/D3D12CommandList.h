@@ -14,7 +14,6 @@ namespace Slipstream::Render
         D3D12CommandListImpl(ID3D12GraphicsCommandList* list);
         ~D3D12CommandListImpl();
 
-        void Reset(CommandAllocator& allocator) override;
         void Close() override;
 
         ID3D12GraphicsCommandList* GetNative() const noexcept { return m_List; }
@@ -23,5 +22,6 @@ namespace Slipstream::Render
 
         friend class D3D12GraphicsDeviceImpl;
         friend class D3D12CommandQueueImpl;
+        friend class D3D12CommandAllocatorImpl;
     };
 }

@@ -3,7 +3,7 @@
 
 using namespace Slipstream::Render;
 
-VulkanCommandListImpl::VulkanCommandListImpl(const CommandListDesc&)
+VulkanCommandListImpl::VulkanCommandListImpl()
 {
     // Framework only: actual creation of command pool and buffer deferred.
     // desc.Type can be used later to pick queue family / usage.
@@ -16,13 +16,7 @@ VulkanCommandListImpl::~VulkanCommandListImpl()
     // TODO: Destroy command buffer / command pool.
 }
 
-
-void VulkanCommandListImpl::Reset(CommandAllocator&)
-{
-    // Framework only: actual reset logic deferred until command pool/buffer creation.
-}
-
 void VulkanCommandListImpl::Close()
-{
-    // Framework only: actual close logic deferred until command buffer creation.
+{    
+	m_CommandBuffer.end();
 }

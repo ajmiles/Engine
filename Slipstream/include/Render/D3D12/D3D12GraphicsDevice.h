@@ -18,10 +18,10 @@ namespace Slipstream::Render
 
         SwapChain        CreateSwapChain(const SwapChainDesc& desc) override;
         CommandQueue     GetCommandQueue(CommandQueueType type, uint index) override;
-        CommandList      CreateCommandList(const CommandListDesc& desc) override;
         CommandAllocator CreateCommandAllocator(const CommandAllocatorDesc& desc) override;
         Fence            CreateFence(const FenceDesc& desc) override;
 
+		IDXGIFactory* m_dxgiFactory = nullptr;
         ID3D12Device4* m_device = nullptr;
 
         D3D12CommandQueueImpl* m_GraphicsQueues = nullptr;

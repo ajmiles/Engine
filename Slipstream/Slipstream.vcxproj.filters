@@ -125,11 +125,14 @@
     <ClCompile Include="src\Render\API\Fence.cpp">
       <Filter>src\Engine\Render\API</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\D3D12\D3D12Fence.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Render\Vulkan\VulkanFence.cpp">
-      <Filter>src</Filter>
+      <Filter>src\Engine\Render\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12Fence.cpp">
+      <Filter>src\Engine\Render\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Vulkan\VulkanSwapChain.cpp">
+      <Filter>src\Engine\Render\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -200,7 +203,10 @@
       <Filter>include\Engine\Render\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\Vulkan\VulkanFence.h">
-      <Filter>include</Filter>
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12Common.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
