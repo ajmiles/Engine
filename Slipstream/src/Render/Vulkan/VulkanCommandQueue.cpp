@@ -33,8 +33,13 @@ void VulkanCommandQueueImpl::Present(SwapChain& swapChain, PresentDesc& desc)
 {
 	VulkanSwapChainImpl* impl = static_cast<VulkanSwapChainImpl*>(swapChain.m_Impl);
 
+	vk::Result res;
+	uint32_t   image;
+	std::tie(res, image) = m_Device.acquireNextImageKHR(impl->m_SwapChain, UINT64_MAX, nullptr, nullptr);
+
 	vk::PresentInfoKHR presentInfo;
 	presentInfo.setSwapchains(impl->m_SwapChain);
+	presentInfo.setImageIndices(image);
 
 	m_Queue.presentKHR(presentInfo);
 }

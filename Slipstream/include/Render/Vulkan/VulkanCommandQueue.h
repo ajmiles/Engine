@@ -8,7 +8,7 @@ namespace Slipstream::Render
     {
     public:
         VulkanCommandQueueImpl() = default;
-        explicit VulkanCommandQueueImpl(vk::Queue q) : m_Queue(q) {}
+        explicit VulkanCommandQueueImpl(vk::Queue q, vk::Device d) : m_Queue(q), m_Device(d) {}
 
         ~VulkanCommandQueueImpl() override = default;
 
@@ -16,6 +16,7 @@ namespace Slipstream::Render
 		void SignalFence(class Fence& fence, uint64 value) override;
 		void Present(class SwapChain& swapChain, PresentDesc& desc) override;
 
+        vk::Device m_Device;
         vk::Queue m_Queue;
     };
 }

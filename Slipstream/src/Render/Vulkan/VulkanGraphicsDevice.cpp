@@ -108,7 +108,7 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
 	features12.pNext = &features13;
 
     std::vector<const char*> deviceExtensions;
-    
+	deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
     vk::DeviceCreateInfo deviceCreateInfo({}, totalQueues, queueCreateInfos);
     deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
@@ -127,11 +127,11 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
         m_CopyQueues = new VulkanCommandQueueImpl[desc.NumCopyQueues];
 
     for (uint i = 0; i < desc.NumGraphicsQueues; ++i)
-        m_GraphicsQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_GraphicsFamily, i));
+        m_GraphicsQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_GraphicsFamily, i), m_device);
     for (uint i = 0; i < desc.NumComputeQueues; ++i)
-        m_ComputeQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_ComputeFamily, i));
+        m_ComputeQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_ComputeFamily, i), m_device);
     for (uint i = 0; i < desc.NumCopyQueues; ++i)
-        m_CopyQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_CopyFamily, i));
+        m_CopyQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_CopyFamily, i), m_device);
 }
 
 VulkanGraphicsDeviceImpl::~VulkanGraphicsDeviceImpl()
@@ -202,7 +202,7 @@ SwapChain VulkanGraphicsDeviceImpl::CreateSwapChain(const SwapChainDesc& desc)
     std::vector<vk::PresentModeKHR> presentModes =
         m_physicalDevice.getSurfacePresentModesKHR(surface);
 
-    vk::SurfaceFormatKHR surfaceFormat = formats[0];
+    vk::SurfaceFormatKHR surfaceFormat = formats[1];
     vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo;
     vk::Extent2D extent = capabilities.currentExtent;
     uint32_t imageCount = capabilities.minImageCount;
@@ -221,7 +221,7 @@ SwapChain VulkanGraphicsDeviceImpl::CreateSwapChain(const SwapChainDesc& desc)
 
 	vk::SwapchainCreateInfoKHR swapchainInfo = {};
 	swapchainInfo.surface = surface;
-	swapchainInfo.minImageCount = imageCount;
+	swapchainInfo.minImageCount = imageCount + 1;
 	swapchainInfo.imageFormat = surfaceFormat.format;
 	swapchainInfo.imageColorSpace = surfaceFormat.colorSpace;
 	swapchainInfo.imageExtent = extent;
@@ -231,8 +231,8 @@ SwapChain VulkanGraphicsDeviceImpl::CreateSwapChain(const SwapChainDesc& desc)
 	swapchainInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 	swapchainInfo.presentMode = presentMode;
 	swapchainInfo.clipped = VK_TRUE;
-    swapchainInfo.queueFamilyIndexCount = 1;
-	swapchainInfo.pQueueFamilyIndices = &family;
+    //swapchainInfo.queueFamilyIndexCount = 1;
+	//swapchainInfo.pQueueFamilyIndices = &family;
 
     vk::SwapchainKHR swapchain;
     try
