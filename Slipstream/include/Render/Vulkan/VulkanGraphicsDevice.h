@@ -1,18 +1,13 @@
 #pragma once
-#include "../API/GraphicsDevice.h"
-#include "Render/API/SwapChain.h"
-#include "Render/API/CommandAllocator.h"
+#include "Render/API/GraphicsDevice.h"
 #include "Render/Vulkan/VulkanSwapChain.h"
 
 #include <vulkan/vulkan.hpp>
-#include <cassert>
 
 namespace Slipstream
 {
     namespace Render
     {
-        class VulkanCommandQueueImpl;
-
         class VulkanGraphicsDeviceImpl : public IGraphicsDeviceImpl
         {
         private:
@@ -30,9 +25,9 @@ namespace Slipstream
             vk::PhysicalDevice m_physicalDevice;
             vk::Device         m_device;
 
-            VulkanCommandQueueImpl* m_GraphicsQueues = nullptr;
-            VulkanCommandQueueImpl* m_ComputeQueues  = nullptr;
-            VulkanCommandQueueImpl* m_CopyQueues     = nullptr;
+            std::vector<VulkanCommandQueueImpl> m_GraphicsQueues;
+            std::vector<VulkanCommandQueueImpl> m_ComputeQueues;
+            std::vector<VulkanCommandQueueImpl> m_CopyQueues;
 
             static const uint INVALID_QUEUE_FAMILY = uint(-1);
             uint m_GraphicsFamily = INVALID_QUEUE_FAMILY;

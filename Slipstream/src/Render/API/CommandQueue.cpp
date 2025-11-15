@@ -4,14 +4,9 @@
 
 using namespace Slipstream::Render;
 
-void CommandQueue::ExecuteCommandList(CommandList& commandList)
+Waitable CommandQueue::ExecuteCommandList(CommandList& commandList, uint numWaits, Waitable* waitables)
 {
-    m_Impl->ExecuteCommandList(commandList);
-}
-
-void CommandQueue::SignalFence(Fence& fence, uint64 value)
-{
-    m_Impl->SignalFence(fence, value);
+    return m_Impl->ExecuteCommandList(commandList, numWaits, waitables);
 }
 
 void CommandQueue::Present(SwapChain& swapChain, PresentDesc& desc)

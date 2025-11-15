@@ -12,7 +12,8 @@ namespace Slipstream::Render
     {
     public:
         virtual ~FenceImpl() = default;
-		virtual uint64_t GetCompletedValue() const = 0;
+
+        virtual void WaitUntilCompleted(uint64_t value) const = 0;
     };
 
     // Non-owning lightweight handle
@@ -20,28 +21,23 @@ namespace Slipstream::Render
     {
     public:
         Fence() = default;
-        ~Fence();
+        ~Fence() = default;
 
-        Fence(const Fence&) = delete;
-        Fence& operator=(const Fence&) = delete;
-        Fence(Fence&& other) noexcept;
-        Fence& operator=(Fence&& other) noexcept;
-
-        uint64_t GetCompletedValue() const
-        {
-			return m_Impl->GetCompletedValue();
-        }
+        bool IsValid() const noexcept { return m_Impl != nullptr; }
+        void WaitUntilCompleted(uint64_t value) const { m_Impl->WaitUntilCompleted(value); }
 
     private:
-        explicit Fence(FenceImpl* impl) noexcept;
+        explicit Fence(std::shared_ptr<FenceImpl> impl) noexcept;
 
-    private:
-        FenceImpl* m_Impl = nullptr;
+        std::shared_ptr<FenceImpl> m_Impl;
 
         friend class D3D12GraphicsDeviceImpl;
         friend class VulkanGraphicsDeviceImpl;
 
 		friend class D3D12CommandQueueImpl;
 		friend class VulkanCommandQueueImpl;
+
+        friend class D3D12SwapChainImpl;
+        friend class VulkanSwapChainImpl;
     };
 }

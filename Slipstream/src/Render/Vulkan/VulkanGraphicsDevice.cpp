@@ -119,28 +119,25 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
 
 	vk::PhysicalDeviceProperties deviceProps = m_physicalDevice.getProperties();
 
-    if (desc.NumGraphicsQueues)
-        m_GraphicsQueues = new VulkanCommandQueueImpl[desc.NumGraphicsQueues];
-    if (desc.NumComputeQueues)
-        m_ComputeQueues = new VulkanCommandQueueImpl[desc.NumComputeQueues];
-    if (desc.NumCopyQueues)
-        m_CopyQueues = new VulkanCommandQueueImpl[desc.NumCopyQueues];
+    m_GraphicsQueues.reserve(desc.NumGraphicsQueues);
+    m_ComputeQueues.reserve(desc.NumComputeQueues);
+    m_CopyQueues.reserve(desc.NumCopyQueues);
 
     for (uint i = 0; i < desc.NumGraphicsQueues; ++i)
-        m_GraphicsQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_GraphicsFamily, i), m_device);
+        m_GraphicsQueues.emplace_back(m_device, m_GraphicsFamily, i);
     for (uint i = 0; i < desc.NumComputeQueues; ++i)
-        m_ComputeQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_ComputeFamily, i), m_device);
+        m_ComputeQueues.emplace_back(m_device, m_ComputeFamily, i);
     for (uint i = 0; i < desc.NumCopyQueues; ++i)
-        m_CopyQueues[i] = VulkanCommandQueueImpl(m_device.getQueue(m_CopyFamily, i), m_device);
+        m_CopyQueues.emplace_back(m_device, m_CopyFamily, i);
 }
 
 VulkanGraphicsDeviceImpl::~VulkanGraphicsDeviceImpl()
 {
-    if (m_GraphicsQueues) delete[] m_GraphicsQueues;
-    if (m_ComputeQueues) delete[] m_ComputeQueues;
-    if (m_CopyQueues) delete[] m_CopyQueues;
-    if (m_device) m_device.destroy();
-    if (m_instance) m_instance.destroy();
+    m_GraphicsQueues.clear();
+    m_ComputeQueues.clear();
+    m_CopyQueues.clear();
+    m_device.destroy();
+    m_instance.destroy();
 }
 
 CommandQueue VulkanGraphicsDeviceImpl::GetCommandQueue(CommandQueueType type, uint index)
@@ -149,11 +146,11 @@ CommandQueue VulkanGraphicsDeviceImpl::GetCommandQueue(CommandQueueType type, ui
     {
     default:
     case CommandQueueType::Graphics:
-        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_GraphicsQueues[index]), type);
+        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_GraphicsQueues[index]));
     case CommandQueueType::Compute:
-        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_ComputeQueues[index]), type);
+        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_ComputeQueues[index]));
     case CommandQueueType::Copy:
-        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_CopyQueues[index]), type);
+        return CommandQueue(static_cast<ICommandQueueImpl*>(&m_CopyQueues[index]));
     }
 }
 
@@ -183,69 +180,7 @@ uint VulkanGraphicsDeviceImpl::FindBestQueueFamilyIndex(vk::QueueFlags desiredFl
 // Add implementation
 SwapChain VulkanGraphicsDeviceImpl::CreateSwapChain(const SwapChainDesc& desc)
 {
-	// Create a Vulkan surface for the window handle
-    vk::Win32SurfaceCreateInfoKHR surfaceInfo;
-    surfaceInfo.hinstance = GetModuleHandle(nullptr);
-    surfaceInfo.hwnd = (HWND)desc.WindowHandle;
-
-    vk::SurfaceKHR surface = m_instance.createWin32SurfaceKHR(surfaceInfo);
-
-    // 1. Get Capabilities (image counts, min/max size, etc.)
-    vk::SurfaceCapabilitiesKHR capabilities =
-        m_physicalDevice.getSurfaceCapabilitiesKHR(surface);
-
-    // 2. Get Supported Formats (pixel format and color space)
-    std::vector<vk::SurfaceFormatKHR> formats =
-        m_physicalDevice.getSurfaceFormatsKHR(surface);
-
-    // 3. Get Supported Presentation Modes (VSync, Mailbox, etc.)
-    std::vector<vk::PresentModeKHR> presentModes =
-        m_physicalDevice.getSurfacePresentModesKHR(surface);
-
-    vk::SurfaceFormatKHR surfaceFormat = formats[1];
-    vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo;
-    vk::Extent2D extent = capabilities.currentExtent;
-    uint32_t imageCount = capabilities.minImageCount;
-
-    // Create a Vulkan command pool allocator
-    uint family;
-
-    switch (desc.PresentQueue.GetQueueType())
-    {
-    case CommandQueueType::Graphics: family = m_GraphicsFamily; break;
-    case CommandQueueType::Compute:  family = m_ComputeFamily;  break;
-    case CommandQueueType::Copy:     family = m_CopyFamily;     break;
-    default:
-        throw std::runtime_error("Invalid CommandAllocatorType");
-    }
-
-	vk::SwapchainCreateInfoKHR swapchainInfo = {};
-	swapchainInfo.surface = surface;
-	swapchainInfo.minImageCount = imageCount + 1;
-	swapchainInfo.imageFormat = surfaceFormat.format;
-	swapchainInfo.imageColorSpace = surfaceFormat.colorSpace;
-	swapchainInfo.imageExtent = extent;
-	swapchainInfo.imageArrayLayers = 1;
-	swapchainInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
-	swapchainInfo.preTransform = capabilities.currentTransform;
-	swapchainInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
-	swapchainInfo.presentMode = presentMode;
-	swapchainInfo.clipped = VK_TRUE;
-    //swapchainInfo.queueFamilyIndexCount = 1;
-	//swapchainInfo.pQueueFamilyIndices = &family;
-
-    vk::SwapchainKHR swapchain;
-    try
-    {
-        swapchain = m_device.createSwapchainKHR(swapchainInfo);
-    }
-    catch (vk::SystemError& err)
-    {
-		OutputDebugStringA(err.what());
-    }
-
-    VulkanSwapChainImpl* impl = new VulkanSwapChainImpl(m_device, surface, swapchain);
-
+    VulkanSwapChainImpl* impl = new VulkanSwapChainImpl(desc, m_instance, m_physicalDevice, m_device);
     return SwapChain(static_cast<ISwapChainImpl*>(impl));
 }
 
@@ -275,11 +210,6 @@ CommandAllocator VulkanGraphicsDeviceImpl::CreateCommandAllocator(const CommandA
 
 Fence VulkanGraphicsDeviceImpl::CreateFence(const FenceDesc& desc)
 {
-	vk::SemaphoreTypeCreateInfo semaphoreTypeInfo = { vk::SemaphoreType::eTimeline, 0 };
-	vk::SemaphoreCreateInfo semaphoreInfo = {};
-	semaphoreInfo.pNext = &semaphoreTypeInfo;
-    vk::Semaphore semaphore = m_device.createSemaphore(semaphoreInfo);
-
-	VulkanFenceImpl* impl = new VulkanFenceImpl(m_device, semaphore);
-    return Fence(static_cast<FenceImpl*>(impl));
+    std::shared_ptr<VulkanFenceImpl> impl = std::make_shared<VulkanFenceImpl>(desc, m_device, vk::SemaphoreType::eTimeline);
+    return Fence(impl);
 }

@@ -1,30 +1,24 @@
 #pragma once
 #include "Render/API/Fence.h"
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
 
 namespace Slipstream::Render
 {
     class VulkanFenceImpl : public FenceImpl
     {
     public:
+        VulkanFenceImpl(const FenceDesc& desc, vk::Device device, vk::SemaphoreType semaphoreType);
         ~VulkanFenceImpl() override;
 
-    private:
-        VulkanFenceImpl(vk::Device device, vk::Semaphore semaphore)
-            : m_Device(device), m_Semaphore(semaphore) {}
-
-        uint64_t GetCompletedValue() const override
+        void WaitUntilCompleted(uint64_t value) const override
         {
-            uint64_t value;
-			vkGetSemaphoreCounterValue(m_Device, m_Semaphore, &value);
-			return value;
+            vk::SemaphoreWaitInfo waitInfo;
+            waitInfo.setSemaphores(m_Semaphore);
+            waitInfo.setValues(value);
+            m_Device.waitSemaphores(waitInfo, UINT64_MAX);
         }
-
-    private:
-        VkSemaphore m_Semaphore = VK_NULL_HANDLE;
-        VkDevice m_Device = VK_NULL_HANDLE;
-
-        friend class VulkanGraphicsDeviceImpl;
-		friend class VulkanCommandQueueImpl;
+        
+        vk::Semaphore m_Semaphore = VK_NULL_HANDLE;
+        vk::Device    m_Device;
     };
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Types.h"
+#include "Render/API/Fence.h"
 
 namespace Slipstream
 {
@@ -7,12 +8,28 @@ namespace Slipstream
     {
         enum class PresentFlags
         {
-			None = 0,
+            None = 0,
+        };
+
+        struct Waitable
+        {
+            Fence fence;
+            uint64_t value = 0;
+
+            void WaitOnCPU() const
+            {
+                if (fence.IsValid())
+                {
+                    fence.WaitUntilCompleted(value);
+                }
+            }
         };
 
         struct PresentDesc
         {
-			PresentFlags Flags = PresentFlags::None;
+            PresentFlags Flags = PresentFlags::None;
+            uint BackBufferIndex = 0xFFFFFFFF;
+            Waitable SwapChainWaitable;
         };
 
         class ICommandQueueImpl
@@ -20,9 +37,8 @@ namespace Slipstream
         public:
             virtual ~ICommandQueueImpl() = default;
 
-            virtual void ExecuteCommandList(class CommandList& commandList) = 0;
-			virtual void SignalFence(class Fence& fence, uint64 value) = 0;
-			virtual void Present(class SwapChain& swapChain, PresentDesc& desc) = 0;
+            virtual Waitable ExecuteCommandList(class CommandList& commandList, uint numWaits, Waitable* waitables) = 0;
+            virtual void Present(class SwapChain& swapChain, PresentDesc& desc) = 0;
         };
 
         enum class CommandQueueType
@@ -44,28 +60,19 @@ namespace Slipstream
             CommandQueue(CommandQueue&&) noexcept = default;
             CommandQueue& operator=(CommandQueue&&) noexcept = default;
 
-            explicit operator bool() const noexcept { return m_Impl != nullptr; }
-            bool IsValid() const noexcept { return m_Impl != nullptr; }
-
-            void ExecuteCommandList(class CommandList& commandList);
-			void SignalFence(class Fence& fence, uint64 value);
-
-			void Present(class SwapChain& swapChain, PresentDesc& desc); // For future use with swap chains.
-
-			CommandQueueType GetQueueType() const noexcept { return m_Type; }
+            Waitable ExecuteCommandList(class CommandList& commandList, uint numWaits = 0, Waitable* waitables = nullptr);
+            void Present(class SwapChain& swapChain, PresentDesc& desc);
 
         private:
-            // Only backend device implementations may construct.
-            explicit CommandQueue(ICommandQueueImpl* impl, CommandQueueType type) noexcept : m_Impl(impl), m_Type(type) {}
+            explicit CommandQueue(ICommandQueueImpl* impl) noexcept : m_Impl(impl) {}
 
-            // Prevent user default construction.
-            CommandQueue() = delete;
-
-			CommandQueueType m_Type;
-            ICommandQueueImpl* m_Impl = nullptr;
+            std::shared_ptr<ICommandQueueImpl> m_Impl;
 
             friend class D3D12GraphicsDeviceImpl;
             friend class VulkanGraphicsDeviceImpl;
+
+            friend class D3D12SwapChainImpl;
+            friend class VulkanSwapChainImpl;
         };
     }
 }

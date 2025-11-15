@@ -8,8 +8,6 @@
 
 namespace Slipstream::Render
 {
-    class D3D12CommandQueueImpl;
-
     class D3D12GraphicsDeviceImpl : public IGraphicsDeviceImpl
     {
     private:
@@ -24,9 +22,9 @@ namespace Slipstream::Render
 		IDXGIFactory* m_dxgiFactory = nullptr;
         ID3D12Device4* m_device = nullptr;
 
-        D3D12CommandQueueImpl* m_GraphicsQueues = nullptr;
-        D3D12CommandQueueImpl* m_ComputeQueues  = nullptr;
-        D3D12CommandQueueImpl* m_CopyQueues     = nullptr;
+        std::vector<D3D12CommandQueueImpl> m_GraphicsQueues;
+        std::vector<D3D12CommandQueueImpl> m_ComputeQueues;
+        std::vector<D3D12CommandQueueImpl> m_CopyQueues;
 
         friend class GraphicsDevice;
     };

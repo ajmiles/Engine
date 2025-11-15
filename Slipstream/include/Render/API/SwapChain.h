@@ -12,10 +12,18 @@ namespace Slipstream::Render
         uint            BufferCount        = 2;
     };
 
+    struct SwapChainContext
+    {
+        Waitable AcquireWaitable;
+        uint BackBufferIndex = 0;
+    };
+
     class ISwapChainImpl
     {
     public:
         virtual ~ISwapChainImpl() = default;
+
+        virtual SwapChainContext BeginRendering() = 0;
     };
 
     // Non-owning handle; cannot be user-constructed.
@@ -28,6 +36,11 @@ namespace Slipstream::Render
         SwapChain& operator=(SwapChain&&) noexcept = default;
 
         ~SwapChain() = default;
+
+        SwapChainContext BeginRendering()
+        {
+            return m_Impl->BeginRendering();
+        }
 
     private:
         SwapChain(const SwapChainDesc& desc);

@@ -5,42 +5,48 @@
 using namespace Slipstream::System;
 using namespace Slipstream::Render;
 
+static const uint NUM_FRAMES = 2;
+
 int WinMain()
 {
 	Window window;
 
     GraphicsDeviceDesc gdDesc = {};
-    gdDesc.API = GraphicsAPI::Vulkan;
+    gdDesc.API = GraphicsAPI::Direct3D12;
     gdDesc.Flags = GraphicsDeviceFlags::Debug;
 
     GraphicsDevice graphicsDevice(gdDesc);
     CommandQueue graphicsQueue = graphicsDevice.GetCommandQueue(CommandQueueType::Graphics, 0);
 
-    uint64_t nextFenceValue = 0;
 
-    SwapChainDesc scDesc = { graphicsQueue, window.GetHandle(), 2 };
+    SwapChainDesc scDesc = { graphicsQueue, window.GetHandle(), NUM_FRAMES };
     SwapChain swapChain = graphicsDevice.CreateSwapChain(scDesc);
-    CommandAllocator commandAllocator = graphicsDevice.CreateCommandAllocator({ CommandAllocatorType::Graphics });
-    //CommandList commandList = graphicsDevice.CreateCommandList({ CommandListType::Graphics });
-    Fence fence = graphicsDevice.CreateFence({});
+
+    CommandAllocator commandAllocators[NUM_FRAMES] =
+    {   graphicsDevice.CreateCommandAllocator({ CommandAllocatorType::Graphics }),
+        graphicsDevice.CreateCommandAllocator({ CommandAllocatorType::Graphics }) 
+    };
+
+    Waitable waitables[NUM_FRAMES] = {};
 
     while (window.Update())
     {
-        commandAllocator.Reset();
-		CommandList commandList = commandAllocator.AllocateCommandList();
+        SwapChainContext swapChainContext = swapChain.BeginRendering();
+        uint currentBackBufferIndex = swapChainContext.BackBufferIndex;
+
+        CommandAllocator& allocator = commandAllocators[currentBackBufferIndex];
+        allocator.Reset();
+
+        CommandList commandList = allocator.AllocateCommandList();
+        // Do something with the commandList here...
+
         commandList.Close();
 
-        graphicsQueue.ExecuteCommandList(commandList);
-        
-		PresentDesc presentDesc = {};
-		graphicsQueue.Present(swapChain, presentDesc);
+        // Since this command list depends on the swap chain acquiring the back buffer, we must wait for the acquire waitable.
+        waitables[currentBackBufferIndex] = graphicsQueue.ExecuteCommandList(commandList, 1, &swapChainContext.AcquireWaitable);
 
-        graphicsQueue.SignalFence(fence, ++nextFenceValue);
-
-        while(fence.GetCompletedValue() < nextFenceValue)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
+        PresentDesc presentDesc = { PresentFlags::None, swapChainContext.BackBufferIndex, waitables[currentBackBufferIndex] };
+        graphicsQueue.Present(swapChain, presentDesc);
 	}
 
 	return 0;

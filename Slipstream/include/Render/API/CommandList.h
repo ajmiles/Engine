@@ -11,6 +11,8 @@ namespace Slipstream::Render
     public:
         virtual ~ICommandListImpl() = default;
         virtual void Close() = 0;
+
+        virtual void Barrier() = 0;
     };
 
     // Non-owning lightweight handle
@@ -23,15 +25,15 @@ namespace Slipstream::Render
         CommandList& operator=(CommandList&&) noexcept = default;
         ~CommandList() = default;
 
-        explicit operator bool() const noexcept { return m_Impl != nullptr; }
+        void Close()        { m_Impl->Close(); }
 
-        void Close()        { if (m_Impl) m_Impl->Close(); }
+        void Barrier();
 
     private:
         CommandList() = delete;
         explicit CommandList(ICommandListImpl* impl) noexcept : m_Impl(impl) {}
 
-        ICommandListImpl* m_Impl = nullptr;
+        ICommandListImpl* m_Impl;
 
         friend class D3D12GraphicsDeviceImpl;
         friend class VulkanGraphicsDeviceImpl;

@@ -8,17 +8,12 @@ namespace Slipstream::Render
     class D3D12FenceImpl : public FenceImpl
     {
     public:
+        D3D12FenceImpl(const FenceDesc& desc, ID3D12Device* device);
         ~D3D12FenceImpl() override;
 
-    private:
-        D3D12FenceImpl(ID3D12Fence* fence)
-            : m_Fence(fence)
+        void WaitUntilCompleted(uint64_t value) const override
         {
-        }
-
-        uint64_t GetCompletedValue() const override
-        {
-			return m_Fence->GetCompletedValue();
+            m_Fence->SetEventOnCompletion(value, nullptr);
         }
 
     private:

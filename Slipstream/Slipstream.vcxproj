@@ -191,6 +191,7 @@
   <ItemGroup>
     <ClInclude Include="include\Core\Types.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\Render\API\Barrier.h" />
     <ClInclude Include="include\Render\API\CommandAllocator.h" />
     <ClInclude Include="include\Render\API\CommandList.h" />
     <ClInclude Include="include\Render\API\CommandQueue.h" />

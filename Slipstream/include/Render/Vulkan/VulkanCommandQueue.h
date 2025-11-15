@@ -1,5 +1,6 @@
 #pragma once
 #include "Render/API/CommandQueue.h"
+#include "Render/Vulkan/VulkanFence.h"
 #include <vulkan/vulkan.hpp>
 
 namespace Slipstream::Render
@@ -7,17 +8,16 @@ namespace Slipstream::Render
     class VulkanCommandQueueImpl final : public ICommandQueueImpl
     {
     public:
-        VulkanCommandQueueImpl() = default;
-        explicit VulkanCommandQueueImpl(vk::Queue q, vk::Device d) : m_Queue(q), m_Device(d) {}
+        VulkanCommandQueueImpl(vk::Device device, uint queueFamilyIndex, uint queueIndex);
+        ~VulkanCommandQueueImpl() override;
 
-        ~VulkanCommandQueueImpl() override = default;
+        Waitable ExecuteCommandList(class CommandList& commandList, uint numWaits, Waitable* waitables) override;
+        void Present(class SwapChain& swapChain, PresentDesc& desc) override;
 
-        void ExecuteCommandList(class CommandList& commandList) override;
-		void SignalFence(class Fence& fence, uint64 value) override;
-		void Present(class SwapChain& swapChain, PresentDesc& desc) override;
-
-        vk::Device m_Device;
         vk::Queue m_Queue;
+        
+        std::shared_ptr<VulkanFenceImpl> m_ProgressFence;
+        uint64_t m_LastSignalledValue = 0;
     };
 }
 

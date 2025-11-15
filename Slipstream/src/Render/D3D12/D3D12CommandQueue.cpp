@@ -7,18 +7,39 @@
 
 namespace Slipstream::Render
 {
-    void D3D12CommandQueueImpl::ExecuteCommandList(CommandList& commandList)
+    D3D12CommandQueueImpl::D3D12CommandQueueImpl(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE type)
     {
-        auto d3d12CommandList = static_cast<D3D12CommandListImpl*>(commandList.m_Impl);
-        ID3D12CommandList* ppCommandLists[] = { d3d12CommandList->GetNative() };
-        m_Queue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+        m_ProgressFence = std::make_shared<D3D12FenceImpl>(FenceDesc{}, device);
+
+        D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+        queueDesc.Type = type;
+        queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+        queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+        queueDesc.NodeMask = 0;
+        HRESULT hr = device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_Queue));
+        if (FAILED(hr))
+            throw std::runtime_error("Failed to create D3D12 command queue");
     }
 
-	void D3D12CommandQueueImpl::SignalFence(Fence& fence, uint64 value)
+    D3D12CommandQueueImpl::~D3D12CommandQueueImpl()
     {
-        auto d3d12FenceImpl = static_cast<D3D12FenceImpl*>(fence.m_Impl);
-        m_Queue->Signal(d3d12FenceImpl->m_Fence, value);
-	}
+        if (m_Queue)
+        {
+            m_Queue->Release();
+            m_Queue = nullptr;
+        }
+    }
+
+    Waitable D3D12CommandQueueImpl::ExecuteCommandList(CommandList& commandList, uint numWaits, Waitable* waitResults)
+    {
+        D3D12CommandListImpl* d3d12CommandList = static_cast<D3D12CommandListImpl*>(commandList.m_Impl);
+        ID3D12CommandList* ppCommandLists[] = { d3d12CommandList->m_List };
+        
+        m_Queue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+        m_Queue->Signal(m_ProgressFence->m_Fence, ++m_LastSignalledValue);
+
+        return Waitable(Fence(m_ProgressFence), m_LastSignalledValue);
+    }
 
     void D3D12CommandQueueImpl::Present(SwapChain& swapChain, PresentDesc& desc)
     {

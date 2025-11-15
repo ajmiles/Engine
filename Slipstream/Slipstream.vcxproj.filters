@@ -208,5 +208,8 @@
     <ClInclude Include="include\Render\D3D12\D3D12Common.h">
       <Filter>include\Engine\Render\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render\API\Barrier.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

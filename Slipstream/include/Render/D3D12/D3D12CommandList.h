@@ -10,13 +10,12 @@ namespace Slipstream::Render
 
     class D3D12CommandListImpl : public ICommandListImpl
     {
-    private:
         D3D12CommandListImpl(ID3D12GraphicsCommandList* list);
         ~D3D12CommandListImpl();
 
         void Close() override;
 
-        ID3D12GraphicsCommandList* GetNative() const noexcept { return m_List; }
+        void Barrier() override {}
 
         ID3D12GraphicsCommandList* m_List = nullptr;
 

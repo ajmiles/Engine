@@ -12,6 +12,10 @@ namespace Slipstream::Render
 
         void Close() override;
 
+        void Barrier() override
+        {
+        }
+
 		vk::CommandBuffer m_CommandBuffer;
 
         friend class VulkanGraphicsDeviceImpl;
