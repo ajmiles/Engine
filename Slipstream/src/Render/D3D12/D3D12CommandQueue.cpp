@@ -32,7 +32,7 @@ namespace Slipstream::Render
 
     Waitable D3D12CommandQueueImpl::ExecuteCommandList(CommandList& commandList, uint numWaits, Waitable* waitResults)
     {
-        D3D12CommandListImpl* d3d12CommandList = static_cast<D3D12CommandListImpl*>(commandList.m_Impl);
+        D3D12CommandListImpl* d3d12CommandList = static_cast<D3D12CommandListImpl*>(commandList.m_Impl.get());
         ID3D12CommandList* ppCommandLists[] = { d3d12CommandList->m_List };
         
         m_Queue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
@@ -45,5 +45,10 @@ namespace Slipstream::Render
     {
 		D3D12SwapChainImpl* swapChainImpl = static_cast<D3D12SwapChainImpl*>(swapChain.m_Impl);
 		swapChainImpl->m_SwapChain->Present(1, 0);
+
+		m_Queue->Signal(m_ProgressFence->m_Fence, ++m_LastSignalledValue);
+
+		Waitable frameEndWaitable = Waitable(Fence(m_ProgressFence), m_LastSignalledValue);
+        swapChainImpl->EndFrame(desc.BackBufferIndex, frameEndWaitable);
 	}
 }

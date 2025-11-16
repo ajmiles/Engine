@@ -9,7 +9,7 @@ VulkanCommandAllocatorImpl::VulkanCommandAllocatorImpl(vk::Device device, vk::Co
     : m_Device(device)
 	, m_Pool(commandPool)
 {
-	m_CommandList = new VulkanCommandListImpl();
+	m_CommandList = std::make_shared<VulkanCommandListImpl>();
 }
 
 VulkanCommandAllocatorImpl::~VulkanCommandAllocatorImpl()
@@ -21,7 +21,7 @@ VulkanCommandAllocatorImpl::~VulkanCommandAllocatorImpl()
     }
 }
 
-ICommandListImpl* VulkanCommandAllocatorImpl::AllocateCommandList()
+CommandList VulkanCommandAllocatorImpl::AllocateCommandList()
 {
     vk::CommandBufferAllocateInfo allocInfo;
     allocInfo.setCommandPool(m_Pool);
@@ -37,9 +37,13 @@ ICommandListImpl* VulkanCommandAllocatorImpl::AllocateCommandList()
 
 	commandBuffer.begin(beginInfo);
 
-	m_CommandList->m_CommandBuffer = commandBuffer;
+	m_CommandList.get()->m_CommandBuffer = commandBuffer;
 
-    return m_CommandList;
+    //char str[256];
+	//sprintf_s(str, "Allocated Vulkan Command Buffer: %p\n", (void*)commandBuffer);
+	//OutputDebugStringA(str);
+
+    return CommandList(m_CommandList);
 }
 
 void VulkanCommandAllocatorImpl::Reset()

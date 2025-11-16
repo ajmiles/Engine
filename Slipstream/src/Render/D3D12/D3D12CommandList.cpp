@@ -26,3 +26,7 @@ void D3D12CommandListImpl::Close()
     if (FAILED(hr))
         throw std::runtime_error("Failed to close D3D12 command list");
 }
+
+void D3D12CommandListImpl::Barrier(uint numBarriers, Slipstream::Render::Barrier* barriers)
+{
+}

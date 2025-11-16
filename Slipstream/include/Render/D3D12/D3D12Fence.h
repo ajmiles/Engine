@@ -5,7 +5,7 @@ struct ID3D12Fence;
 
 namespace Slipstream::Render
 {
-    class D3D12FenceImpl : public FenceImpl
+    class D3D12FenceImpl : public IFenceImpl
     {
     public:
         D3D12FenceImpl(const FenceDesc& desc, ID3D12Device* device);

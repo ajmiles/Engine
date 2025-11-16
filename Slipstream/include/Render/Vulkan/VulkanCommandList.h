@@ -6,15 +6,13 @@ namespace Slipstream::Render
 {
     class VulkanCommandListImpl : public ICommandListImpl
     {
-    private:
+    public:
         VulkanCommandListImpl();
         ~VulkanCommandListImpl();
 
         void Close() override;
 
-        void Barrier() override
-        {
-        }
+        void Barrier(uint numBarriers, Slipstream::Render::Barrier* barriers) override;
 
 		vk::CommandBuffer m_CommandBuffer;
 

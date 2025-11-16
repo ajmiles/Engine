@@ -211,5 +211,29 @@
     <ClInclude Include="include\Render\API\Barrier.h">
       <Filter>include\Engine\Render\API</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanCommon.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\Buffer.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12Buffer.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanBuffer.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\Texture.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\D3D12\D3D12Texture.h">
+      <Filter>include\Engine\Render\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Vulkan\VulkanTexture.h">
+      <Filter>include\Engine\Render\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\API\Constants.h">
+      <Filter>include\Engine\Render\API</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

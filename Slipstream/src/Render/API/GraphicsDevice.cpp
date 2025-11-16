@@ -16,7 +16,7 @@ GraphicsDevice::GraphicsDevice(const GraphicsDeviceDesc& desc)
 {
     switch (m_Desc.API)
     {
-    case GraphicsAPI::Direct3D12:
+    case GraphicsAPI::D3D12:
         m_Impl.reset(new D3D12GraphicsDeviceImpl(m_Desc));
         break;
     case GraphicsAPI::Vulkan:

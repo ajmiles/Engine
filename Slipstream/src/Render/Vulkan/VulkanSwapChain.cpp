@@ -1,17 +1,12 @@
 #include "pch.h"
 #include "Render/Vulkan/VulkanSwapChain.h"
+#include "Render/Vulkan/VulkanTexture.h"
 
 namespace Slipstream::Render
 {
     VulkanSwapChainImpl::VulkanSwapChainImpl(const SwapChainDesc& desc, vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device device)
         : m_Device(device), m_BufferCount(desc.BufferCount)
     {
-        for (int i = 0; i < desc.BufferCount; ++i)
-        {
-            m_SwapChainAcquireSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
-            m_SwapChainPresentSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
-        }
-
         // Create a Vulkan surface for the window handle
         vk::Win32SurfaceCreateInfoKHR surfaceInfo;
         surfaceInfo.hinstance = GetModuleHandle(nullptr);
@@ -38,7 +33,7 @@ namespace Slipstream::Render
 
         vk::SwapchainCreateInfoKHR swapchainInfo = {};
         swapchainInfo.surface = m_Surface;
-        swapchainInfo.minImageCount = imageCount;
+        swapchainInfo.minImageCount = std::max(imageCount, desc.BufferCount);
         swapchainInfo.imageFormat = surfaceFormat.format;
         swapchainInfo.imageColorSpace = surfaceFormat.colorSpace;
         swapchainInfo.imageExtent = extent;
@@ -50,6 +45,15 @@ namespace Slipstream::Render
         swapchainInfo.clipped = VK_TRUE;
 
         m_SwapChain = m_Device.createSwapchainKHR(swapchainInfo);
+
+		auto swapChainImages = m_Device.getSwapchainImagesKHR(m_SwapChain);
+
+        for (uint i = 0; i < desc.BufferCount; ++i)
+        {
+            m_SwapChainAcquireSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
+            m_SwapChainPresentSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
+            m_SwapChainImages[i] = std::make_shared<VulkanTextureImpl>(swapChainImages[i]);
+        }
     }
 
     VulkanSwapChainImpl::~VulkanSwapChainImpl()
@@ -64,10 +68,13 @@ namespace Slipstream::Render
         // We need to throttle the CPU to make sure the next semaphore has been signalled
         m_SwapChainFences[m_NextSemaphoreIndex].WaitOnCPU();
 
-
         vk::Result res;
         uint32_t imageIndex;
         std::tie(res, imageIndex) = m_Device.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_SwapChainAcquireSemaphores[m_NextSemaphoreIndex]->m_Semaphore);
+
+        //char str[256];
+		//std::snprintf(str, sizeof(str), "VulkanSwapChainImpl::BeginRendering() - Acquired Image Index: %u, m_NextSemaphoreIndex = %u\n", imageIndex, m_NextSemaphoreIndex);
+        //OutputDebugStringA(str);
 
         SwapChainContext context;
         context.AcquireWaitable = Waitable(Fence(m_SwapChainAcquireSemaphores[m_NextSemaphoreIndex]), 0xFFFFFFFF);
@@ -77,4 +84,9 @@ namespace Slipstream::Render
 
         return context;
     }
+
+	Texture VulkanSwapChainImpl::GetBackBufferTexture(uint index)
+    {
+        return Texture(m_SwapChainImages[index]);
+	}
 }

@@ -78,7 +78,7 @@ CommandAllocator D3D12GraphicsDeviceImpl::CreateCommandAllocator(const CommandAl
     ID3D12CommandAllocator* allocator = nullptr;
 
     HRESULT hr = m_device->CreateCommandAllocator(
-        ToD3DType(desc.Type),
+        D3D12CommandAllocatorImpl::ToD3DType(desc.Type),
         IID_PPV_ARGS(&allocator)
     );
 
@@ -89,7 +89,7 @@ CommandAllocator D3D12GraphicsDeviceImpl::CreateCommandAllocator(const CommandAl
 
     hr = m_device->CreateCommandList1(
         0,
-        ToD3DType(static_cast<CommandAllocatorType>(desc.Type)),
+        D3D12CommandAllocatorImpl::ToD3DType(static_cast<CommandAllocatorType>(desc.Type)),
         D3D12_COMMAND_LIST_FLAG_NONE,
         IID_PPV_ARGS(&d3dCommandList)
     );

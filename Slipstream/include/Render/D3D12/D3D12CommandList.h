@@ -1,21 +1,17 @@
 #pragma once
 #include "Render/API/CommandList.h"
 
-
-struct ID3D12CommandList;
-
 namespace Slipstream::Render
 {
-    class CommandAllocator;
-
     class D3D12CommandListImpl : public ICommandListImpl
     {
+    public:
         D3D12CommandListImpl(ID3D12GraphicsCommandList* list);
         ~D3D12CommandListImpl();
 
         void Close() override;
 
-        void Barrier() override {}
+        void Barrier(uint numBarriers, Slipstream::Render::Barrier* barriers) override;
 
         ID3D12GraphicsCommandList* m_List = nullptr;
 

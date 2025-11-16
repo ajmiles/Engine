@@ -75,8 +75,8 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
     auto deviceExtensionsList = m_physicalDevice.enumerateDeviceExtensionProperties();
     for (const auto& ext : deviceExtensionsList)
     {
-		OutputDebugStringA(ext.extensionName);
-		OutputDebugStringA("\n");
+		//OutputDebugStringA(ext.extensionName);
+		//OutputDebugStringA("\n");
     }
 
     m_GraphicsFamily = FindBestQueueFamilyIndex(vk::QueueFlagBits::eGraphics);
@@ -133,6 +133,8 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
 
 VulkanGraphicsDeviceImpl::~VulkanGraphicsDeviceImpl()
 {
+    m_device.waitIdle();
+
     m_GraphicsQueues.clear();
     m_ComputeQueues.clear();
     m_CopyQueues.clear();

@@ -21,7 +21,7 @@ VulkanCommandQueueImpl::~VulkanCommandQueueImpl()
 Waitable VulkanCommandQueueImpl::ExecuteCommandList(CommandList& commandList, uint numWaits, Waitable* waitables)
 {
     vk::CommandBufferSubmitInfo commandBufferSubmitInfo = {};
-    commandBufferSubmitInfo.setCommandBuffer(static_cast<VulkanCommandListImpl*>(commandList.m_Impl)->m_CommandBuffer);
+    commandBufferSubmitInfo.setCommandBuffer(static_cast<VulkanCommandListImpl*>(commandList.m_Impl.get())->m_CommandBuffer);
 
 	vk::SubmitInfo2 submitInfo;
     submitInfo.setCommandBufferInfoCount(1);
@@ -49,6 +49,9 @@ Waitable VulkanCommandQueueImpl::ExecuteCommandList(CommandList& commandList, ui
     submitInfo.setSignalSemaphoreInfoCount(1);
     submitInfo.setPSignalSemaphoreInfos(&signalSemaphoreInfo);
     
+    //char str[256];
+	//std::snprintf(str, 256, "ExecuteCommandList Fence = %p Signal Value: %llu\n", (void*)&m_ProgressFence->m_Semaphore, m_LastSignalledValue);
+    //OutputDebugStringA(str);
 
     m_Queue.submit2(submitInfo);
 
@@ -63,30 +66,36 @@ void VulkanCommandQueueImpl::Present(SwapChain& swapChain, PresentDesc& desc)
 	VulkanSwapChainImpl* impl = static_cast<VulkanSwapChainImpl*>(swapChain.m_Impl);
     VulkanFenceImpl* waitFenceImpl = static_cast<VulkanFenceImpl*>(desc.SwapChainWaitable.fence.m_Impl.get());
 
-    // Since PresentKHR doesn't support timeline semaphores, we have to use the binary semaphore here.
-    // We'll make a dummy submit2 to signal the binary semaphore when the timeline semaphore reaches the desired value.
-    // and then use that binary semaphore in Present
-
     vk::Semaphore presentSemaphore = impl->m_SwapChainPresentSemaphores[desc.BackBufferIndex]->m_Semaphore;
     impl->m_SwapChainFences[desc.BackBufferIndex] = desc.SwapChainWaitable;
 
-    vk::SubmitInfo2 submitInfo;
-    submitInfo.setCommandBufferInfoCount(0);
-    submitInfo.setWaitSemaphoreInfoCount(1);
-    submitInfo.setSignalSemaphoreInfoCount(1);
+    {
+        // Since PresentKHR doesn't support timeline semaphores, we have to use the binary semaphore here.
+        // We'll make a dummy submit2 to signal the binary semaphore when the timeline semaphore reaches the desired value.
+        // and then use that binary semaphore in Present
 
-    vk::SemaphoreSubmitInfo waitSemaphoreInfo = {};
-    waitSemaphoreInfo.setSemaphore(waitFenceImpl->m_Semaphore);
-    waitSemaphoreInfo.setValue(desc.SwapChainWaitable.value);
+        vk::SubmitInfo2 submitInfo;
+        submitInfo.setCommandBufferInfoCount(0);
+        submitInfo.setWaitSemaphoreInfoCount(1);
+        submitInfo.setSignalSemaphoreInfoCount(1);
 
-    submitInfo.setPWaitSemaphoreInfos(&waitSemaphoreInfo);
+        vk::SemaphoreSubmitInfo waitSemaphoreInfo = {};
+        waitSemaphoreInfo.setSemaphore(waitFenceImpl->m_Semaphore);
+        waitSemaphoreInfo.setValue(desc.SwapChainWaitable.value);
 
-    vk::SemaphoreSubmitInfo signalSemaphoreInfo = {};
-    signalSemaphoreInfo.setSemaphore(presentSemaphore);
+        submitInfo.setPWaitSemaphoreInfos(&waitSemaphoreInfo);
 
-    submitInfo.setPSignalSemaphoreInfos(&signalSemaphoreInfo);
+        vk::SemaphoreSubmitInfo signalSemaphoreInfo = {};
+        signalSemaphoreInfo.setSemaphore(presentSemaphore);
 
-	m_Queue.submit2(submitInfo);
+        submitInfo.setPSignalSemaphoreInfos(&signalSemaphoreInfo);
+
+        //char str[256];
+		//std::snprintf(str, 256, "Waitable Fence = %p Present Wait Fence Value: %llu\n", (void*)&waitFenceImpl->m_Semaphore, desc.SwapChainWaitable.value);
+        //OutputDebugStringA(str);
+
+        m_Queue.submit2(submitInfo);
+    }
 
     // TODO sort this mess out
 

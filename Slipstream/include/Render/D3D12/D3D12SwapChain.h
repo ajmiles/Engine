@@ -1,10 +1,13 @@
 #pragma once
+#include "Render/API/Constants.h"
 #include "Render/API/SwapChain.h"
 #include <dxgi1_4.h>
 #include <d3d12.h>
 
 namespace Slipstream::Render
 {
+	class D3D12TextureImpl;
+
     class D3D12SwapChainImpl : public ISwapChainImpl
     {
     public:
@@ -13,15 +16,18 @@ namespace Slipstream::Render
     private:
         D3D12SwapChainImpl(const SwapChainDesc& desc, IDXGIFactory* factory);
 
-        SwapChainContext BeginRendering() override
+        SwapChainContext BeginRendering() override;
+        void EndFrame(uint backBufferIndex, Waitable& signalWaitable)
         {
-            SwapChainContext context;
-            context.AcquireWaitable = Waitable(Fence(), 0); // No fence for D3D12 swap chain acquire.
-            context.BackBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
-            return context;
+			m_FrameEndWaitables[backBufferIndex] = signalWaitable;
         }
 
+		Texture GetBackBufferTexture(uint index) override;
+
         IDXGISwapChain3* m_SwapChain = nullptr;
+		std::shared_ptr<D3D12TextureImpl> m_BackBufferTextures[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS] = { nullptr };
+
+        Waitable m_FrameEndWaitables[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
 
 		friend class D3D12GraphicsDeviceImpl;
 		friend class D3D12CommandQueueImpl;

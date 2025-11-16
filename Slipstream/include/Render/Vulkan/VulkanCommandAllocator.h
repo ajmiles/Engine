@@ -12,10 +12,11 @@ namespace Slipstream::Render
         VulkanCommandAllocatorImpl(vk::Device device, vk::CommandPool commandPool);
         ~VulkanCommandAllocatorImpl() override;
 
-        ICommandListImpl* AllocateCommandList() override;
+        CommandList AllocateCommandList() override;
         void Reset() override;
 
-		VulkanCommandListImpl* m_CommandList = nullptr;
+		std::shared_ptr<VulkanCommandListImpl> m_CommandList;
+
         vk::Device      m_Device;
         vk::CommandPool m_Pool;
 

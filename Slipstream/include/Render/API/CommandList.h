@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Types.h"
+#include "Render/API/Barrier.h"
 #include "Render/API/CommandQueue.h"
 
 namespace Slipstream::Render
@@ -12,7 +13,7 @@ namespace Slipstream::Render
         virtual ~ICommandListImpl() = default;
         virtual void Close() = 0;
 
-        virtual void Barrier() = 0;
+        virtual void Barrier(uint numBarriers, Barrier* barriers) = 0;
     };
 
     // Non-owning lightweight handle
@@ -27,13 +28,13 @@ namespace Slipstream::Render
 
         void Close()        { m_Impl->Close(); }
 
-        void Barrier();
+        void Barrier(uint numBarriers, Barrier* barriers) { m_Impl->Barrier(numBarriers, barriers); }
 
     private:
         CommandList() = delete;
-        explicit CommandList(ICommandListImpl* impl) noexcept : m_Impl(impl) {}
+        explicit CommandList(std::shared_ptr<ICommandListImpl> impl) noexcept : m_Impl(impl) {}
 
-        ICommandListImpl* m_Impl;
+        std::shared_ptr<ICommandListImpl> m_Impl;
 
         friend class D3D12GraphicsDeviceImpl;
         friend class VulkanGraphicsDeviceImpl;
@@ -43,5 +44,6 @@ namespace Slipstream::Render
         friend class D3D12CommandAllocatorImpl;
 
         friend class VulkanCommandQueueImpl;
+		friend class VulkanCommandAllocatorImpl;
     };
 }

@@ -8,15 +8,15 @@ namespace Slipstream::Render
         // Future expansion.
     };
 
-    class FenceImpl
+    class IFenceImpl
     {
     public:
-        virtual ~FenceImpl() = default;
+        virtual ~IFenceImpl() = default;
 
         virtual void WaitUntilCompleted(uint64_t value) const = 0;
     };
 
-    // Non-owning lightweight handle
+
     class Fence
     {
     public:
@@ -27,9 +27,9 @@ namespace Slipstream::Render
         void WaitUntilCompleted(uint64_t value) const { m_Impl->WaitUntilCompleted(value); }
 
     private:
-        explicit Fence(std::shared_ptr<FenceImpl> impl) noexcept;
+        explicit Fence(std::shared_ptr<IFenceImpl> impl) noexcept;
 
-        std::shared_ptr<FenceImpl> m_Impl;
+        std::shared_ptr<IFenceImpl> m_Impl;
 
         friend class D3D12GraphicsDeviceImpl;
         friend class VulkanGraphicsDeviceImpl;

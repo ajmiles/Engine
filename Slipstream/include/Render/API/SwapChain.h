@@ -2,6 +2,7 @@
 #include "Core/Types.h"
 #include "System/API/Window.h"
 #include "Render/API/CommandQueue.h"
+#include "Render/API/Texture.h"
 
 namespace Slipstream::Render
 {
@@ -24,6 +25,7 @@ namespace Slipstream::Render
         virtual ~ISwapChainImpl() = default;
 
         virtual SwapChainContext BeginRendering() = 0;
+		virtual Texture GetBackBufferTexture(uint index) = 0;
     };
 
     // Non-owning handle; cannot be user-constructed.
@@ -40,6 +42,11 @@ namespace Slipstream::Render
         SwapChainContext BeginRendering()
         {
             return m_Impl->BeginRendering();
+        }
+
+        Texture GetBackBufferTexture(uint index)
+        {
+			return m_Impl->GetBackBufferTexture(index);
         }
 
     private:

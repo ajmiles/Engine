@@ -4,7 +4,7 @@
 
 namespace Slipstream::Render
 {
-    Fence::Fence(std::shared_ptr<FenceImpl> impl) noexcept
+    Fence::Fence(std::shared_ptr<IFenceImpl> impl) noexcept
         : m_Impl(impl)
     {
     }

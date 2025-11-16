@@ -1,10 +1,13 @@
 #pragma once
+#include "Render/API/Constants.h"
 #include "Render/API/SwapChain.h"
 #include "Render/Vulkan/VulkanFence.h"
 #include <vulkan/vulkan.hpp>
 
 namespace Slipstream::Render
 {
+	class VulkanTextureImpl;
+
     class VulkanSwapChainImpl : public ISwapChainImpl
     {
     public:
@@ -13,16 +16,19 @@ namespace Slipstream::Render
 
         SwapChainContext BeginRendering() override;
 
+		Texture GetBackBufferTexture(uint index) override;
+
     private:
         vk::Device       m_Device;
         vk::SurfaceKHR   m_Surface;
         vk::SwapchainKHR m_SwapChain;
 
-        static const uint MAX_SWAPCHAIN_IMAGES = 4;
+		//vk::Image 	                    m_SwapChainImages[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
+		std::shared_ptr<VulkanTextureImpl>  m_SwapChainImages[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS] = { nullptr };
 
-        std::shared_ptr<VulkanFenceImpl> m_SwapChainAcquireSemaphores[MAX_SWAPCHAIN_IMAGES];
-        std::shared_ptr<VulkanFenceImpl> m_SwapChainPresentSemaphores[MAX_SWAPCHAIN_IMAGES];
-        Waitable                         m_SwapChainFences[MAX_SWAPCHAIN_IMAGES];
+        std::shared_ptr<VulkanFenceImpl> m_SwapChainAcquireSemaphores[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
+        std::shared_ptr<VulkanFenceImpl> m_SwapChainPresentSemaphores[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
+        Waitable                         m_SwapChainFences[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
         uint                             m_NextSemaphoreIndex = 0;
         uint                             m_BufferCount = 0;
 

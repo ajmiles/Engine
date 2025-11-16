@@ -13,7 +13,7 @@ namespace Slipstream
     {
         enum class GraphicsAPI
         {
-            Direct3D12,
+            D3D12,
             Vulkan,
             Metal,
             Count
