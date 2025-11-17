@@ -14,6 +14,9 @@ namespace Slipstream::Render
 
         void Barrier(uint numBarriers, Slipstream::Render::Barrier* barriers) override;
 
+		void BeginPass(RenderingInfo& renderingInfo) override;
+		void EndPass() override;
+
 		vk::CommandBuffer m_CommandBuffer;
 
         friend class VulkanGraphicsDeviceImpl;

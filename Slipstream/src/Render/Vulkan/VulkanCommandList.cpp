@@ -23,6 +23,39 @@ void VulkanCommandListImpl::Close()
 	m_CommandBuffer.end();
 }
 
+void VulkanCommandListImpl::BeginPass(RenderingInfo& info)
+{
+	vk::RenderingAttachmentInfo colorAttachments[SLIPSTREAM_RENDER_MAX_RENDER_TARGETS] = {};
+	vk::RenderingInfo renderingInfo;
+
+	renderingInfo.setRenderArea(vk::Rect2D{ { info.RenderArea.X, info.RenderArea.Y }, { (uint)info.RenderArea.Width, (uint)info.RenderArea.Height } });
+	renderingInfo.setLayerCount(1);
+	renderingInfo.setViewMask(0);
+	renderingInfo.setColorAttachmentCount(info.NumRenderTargets);
+	renderingInfo.setPColorAttachments(colorAttachments);
+	
+
+	for (uint i = 0; i < info.NumRenderTargets; ++i)
+	{
+		vk::ImageView* imageView = reinterpret_cast<vk::ImageView*>(info.RenderTargetInfos[i].RTV);
+		Color<float>& clearColor = info.RenderTargetInfos[i].ClearColor;
+
+		vk::RenderingAttachmentInfo& colorAttachment = colorAttachments[i];
+		colorAttachment.imageView = *imageView;
+		colorAttachment.imageLayout = vk::ImageLayout::eColorAttachmentOptimal;
+		colorAttachment.loadOp = ToVulkanType(info.RenderTargetInfos[i].ClearOp);
+		colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
+		colorAttachment.clearValue.color = vk::ClearColorValue{ clearColor.R, clearColor.G, clearColor.B, clearColor.A };
+	}
+
+	m_CommandBuffer.beginRendering(renderingInfo);
+}
+
+void VulkanCommandListImpl::EndPass()
+{
+	m_CommandBuffer.endRendering();
+}
+
 void VulkanCommandListImpl::Barrier(uint numBarriers, Slipstream::Render::Barrier* barriers)
 {
 	uint numImageBarriers = 0;

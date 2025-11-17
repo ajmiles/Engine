@@ -54,6 +54,13 @@ uint64_t Win32WindowImpl::GetHandle() const
     return reinterpret_cast<uint64_t>(m_hWnd);
 }
 
+Rect<int> Win32WindowImpl::GetClientRect() const
+{
+    RECT rect;
+    ::GetClientRect(m_hWnd, &rect);
+    return Rect<int>(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+}
+
 LRESULT CALLBACK Win32WindowImpl::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)

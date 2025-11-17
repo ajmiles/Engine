@@ -3,6 +3,7 @@
 #include "Render/Vulkan/VulkanSwapChain.h"
 
 #include <vulkan/vulkan.hpp>
+#include <mutex>
 
 namespace Slipstream
 {
@@ -18,6 +19,9 @@ namespace Slipstream
             CommandQueue     GetCommandQueue(CommandQueueType type, uint index) override;
             CommandAllocator CreateCommandAllocator(const CommandAllocatorDesc& desc) override;
             Fence            CreateFence(const FenceDesc& desc) override;
+
+			RenderTargetView CreateRenderTargetView(const RenderTargetViewDesc& desc) override;
+			void             DestroyRenderTargetView(const RenderTargetView rtv) override;
 
             uint FindBestQueueFamilyIndex(vk::QueueFlags desiredFlags);
 
@@ -35,6 +39,11 @@ namespace Slipstream
             uint m_CopyFamily     = INVALID_QUEUE_FAMILY;
 
             std::vector<VulkanSwapChainImpl>        m_SwapChains;
+
+            VkImageView* m_RTVDescriptorHeap;
+            std::vector<RenderTargetView> m_RTVDescriptorHeapFreeList;
+
+			std::mutex m_CriticalSection;
 
             friend class GraphicsDevice;
         };

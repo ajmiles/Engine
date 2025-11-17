@@ -6,7 +6,7 @@ namespace Slipstream::Render
     class D3D12CommandAllocatorImpl : public CommandAllocatorImpl
     {
     private:
-        D3D12CommandAllocatorImpl(ID3D12CommandAllocator* allocator, ID3D12GraphicsCommandList* commandList);
+        D3D12CommandAllocatorImpl(ID3D12CommandAllocator* allocator, ID3D12GraphicsCommandList7* commandList);
         ~D3D12CommandAllocatorImpl() override;
 
         CommandList AllocateCommandList() override;

@@ -14,7 +14,12 @@ namespace Slipstream::Render
         virtual void Close() = 0;
 
         virtual void Barrier(uint numBarriers, Barrier* barriers) = 0;
+
+		virtual void BeginPass(RenderingInfo& renderingInfo) = 0;
+		virtual void EndPass() = 0;
     };
+
+    
 
     // Non-owning lightweight handle
     class CommandList
@@ -27,6 +32,16 @@ namespace Slipstream::Render
         ~CommandList() = default;
 
         void Close()        { m_Impl->Close(); }
+
+        void BeginPass(RenderingInfo& renderingInfo)
+        {
+			m_Impl->BeginPass(renderingInfo);
+        }
+
+        void EndPass()
+        {
+			m_Impl->EndPass();
+        }
 
         void Barrier(uint numBarriers, Barrier* barriers) { m_Impl->Barrier(numBarriers, barriers); }
 

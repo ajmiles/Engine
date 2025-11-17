@@ -134,6 +134,9 @@
     <ClCompile Include="src\Render\Vulkan\VulkanSwapChain.cpp">
       <Filter>src\Engine\Render\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\D3D12\D3D12RTVManager.cpp">
+      <Filter>src\Engine\Render\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\System\API\Window.h">
@@ -232,7 +235,7 @@
     <ClInclude Include="include\Render\Vulkan\VulkanTexture.h">
       <Filter>include\Engine\Render\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="include\Render\API\Constants.h">
+    <ClInclude Include="include\Render\API\SlipstreamRender.h">
       <Filter>include\Engine\Render\API</Filter>
     </ClInclude>
   </ItemGroup>

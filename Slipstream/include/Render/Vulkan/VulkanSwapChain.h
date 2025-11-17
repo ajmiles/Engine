@@ -1,5 +1,5 @@
 #pragma once
-#include "Render/API/Constants.h"
+#include "Render/API/SlipstreamRender.h"
 #include "Render/API/SwapChain.h"
 #include "Render/Vulkan/VulkanFence.h"
 #include <vulkan/vulkan.hpp>
@@ -28,8 +28,11 @@ namespace Slipstream::Render
 
         std::shared_ptr<VulkanFenceImpl> m_SwapChainAcquireSemaphores[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
         std::shared_ptr<VulkanFenceImpl> m_SwapChainPresentSemaphores[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
+
+		// Indicates that a buffer is available for rendering.
         Waitable                         m_SwapChainFences[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
-        uint                             m_NextSemaphoreIndex = 0;
+
+        //uint                             m_NextSemaphoreIndex = 0;
         uint                             m_BufferCount = 0;
 
         friend class VulkanCommandQueueImpl;

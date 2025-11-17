@@ -48,3 +48,8 @@ Fence GraphicsDevice::CreateFence(const FenceDesc& desc)
 {
     return m_Impl->CreateFence(desc);
 }
+
+RenderTargetView GraphicsDevice::CreateRenderTargetView(const RenderTargetViewDesc& desc)
+{
+    return m_Impl->CreateRenderTargetView(desc);
+}

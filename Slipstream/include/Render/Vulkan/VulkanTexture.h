@@ -12,6 +12,7 @@ namespace Slipstream::Render
     private:
         vk::Image m_Image;
 
+		friend class VulkanGraphicsDeviceImpl;
 		friend class VulkanCommandListImpl;
     };
 }

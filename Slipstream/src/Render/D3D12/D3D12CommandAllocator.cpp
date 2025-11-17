@@ -5,7 +5,7 @@
 
 using namespace Slipstream::Render;
 
-D3D12CommandAllocatorImpl::D3D12CommandAllocatorImpl(ID3D12CommandAllocator* allocator, ID3D12GraphicsCommandList* commandList)
+D3D12CommandAllocatorImpl::D3D12CommandAllocatorImpl(ID3D12CommandAllocator* allocator, ID3D12GraphicsCommandList7* commandList)
 	: m_Allocator(allocator)
 {
     m_CommandList = std::make_shared<D3D12CommandListImpl>(commandList);
@@ -22,7 +22,7 @@ D3D12CommandAllocatorImpl::~D3D12CommandAllocatorImpl()
 
 CommandList D3D12CommandAllocatorImpl::AllocateCommandList()
 {
-    ID3D12GraphicsCommandList* d3dCommandList = m_CommandList->m_List;
+    ID3D12GraphicsCommandList7* d3dCommandList = m_CommandList->m_List;
 	HRESULT hr = d3dCommandList->Reset(m_Allocator, nullptr);
     if (FAILED(hr))
 		throw std::runtime_error("Failed to reset D3D12 command list");

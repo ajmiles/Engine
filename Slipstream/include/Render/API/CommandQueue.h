@@ -23,6 +23,11 @@ namespace Slipstream
                     fence.WaitUntilCompleted(value);
                 }
             }
+
+            bool HasCompleted() const
+            {
+				return (fence.IsValid()) ? fence.HasCompleted(value) : true;
+			}
         };
 
         struct PresentDesc

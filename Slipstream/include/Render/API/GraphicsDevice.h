@@ -33,6 +33,8 @@ namespace Slipstream
             uint NumGraphicsQueues = 1;
             uint NumComputeQueues  = 1;
             uint NumCopyQueues     = 1;
+
+			uint MaxRenderTargetViews = 1024;
         };
 
         class IGraphicsDeviceImpl
@@ -43,6 +45,9 @@ namespace Slipstream
             virtual SwapChain        CreateSwapChain(const SwapChainDesc& desc) = 0;
             virtual CommandAllocator CreateCommandAllocator(const CommandAllocatorDesc& desc) = 0;
             virtual Fence            CreateFence(const FenceDesc& desc) = 0;
+
+			virtual RenderTargetView CreateRenderTargetView(const RenderTargetViewDesc& desc) = 0;
+			virtual void DestroyRenderTargetView(const RenderTargetView rtv) = 0;
         };
 
         class GraphicsDevice
@@ -56,6 +61,9 @@ namespace Slipstream
             SwapChain        CreateSwapChain(const SwapChainDesc& desc);
             CommandAllocator CreateCommandAllocator(const CommandAllocatorDesc& desc);
             Fence            CreateFence(const FenceDesc& desc);
+
+			RenderTargetView CreateRenderTargetView(const RenderTargetViewDesc& desc);
+			void DestroyRenderTargetView(const RenderTargetView rtv);
 
             const GraphicsDeviceDesc& GetDesc() const noexcept { return m_Desc; }
 

@@ -13,6 +13,7 @@ namespace Slipstream::Render
     public:
         virtual ~IFenceImpl() = default;
 
+        virtual bool HasCompleted(uint64_t value) const = 0;
         virtual void WaitUntilCompleted(uint64_t value) const = 0;
     };
 
@@ -24,6 +25,7 @@ namespace Slipstream::Render
         ~Fence() = default;
 
         bool IsValid() const noexcept { return m_Impl != nullptr; }
+		bool HasCompleted(uint64_t value) const { return m_Impl->HasCompleted(value); }
         void WaitUntilCompleted(uint64_t value) const { m_Impl->WaitUntilCompleted(value); }
 
     private:

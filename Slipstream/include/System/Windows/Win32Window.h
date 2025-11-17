@@ -13,6 +13,7 @@ namespace Slipstream
 
             bool Update() const override;
 			uint64_t GetHandle() const override;
+			Rect<int> GetClientRect() const override;
 
             static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

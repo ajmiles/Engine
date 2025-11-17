@@ -12,6 +12,8 @@ namespace Slipstream
 
             virtual bool Update() const = 0;
             virtual uint64_t GetHandle() const = 0;
+
+			virtual Rect<int> GetClientRect() const = 0;
 		};
 
 		struct WindowDesc
@@ -33,6 +35,11 @@ namespace Slipstream
 
             bool Update() const;
             uint64_t GetHandle() const;
+
+			Rect<int> GetClientRect() const
+			{
+				return m_Impl->GetClientRect();
+			}
 
 		private:
 			IWindowImpl* m_Impl;

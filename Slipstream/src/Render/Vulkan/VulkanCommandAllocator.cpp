@@ -39,14 +39,17 @@ CommandList VulkanCommandAllocatorImpl::AllocateCommandList()
 
 	m_CommandList.get()->m_CommandBuffer = commandBuffer;
 
-    //char str[256];
-	//sprintf_s(str, "Allocated Vulkan Command Buffer: %p\n", (void*)commandBuffer);
-	//OutputDebugStringA(str);
+    char str[256];
+	sprintf_s(str, "Allocated Command Buffer: %p\n", (void*)commandBuffer);
+	OutputDebugStringA(str);
 
     return CommandList(m_CommandList);
 }
 
 void VulkanCommandAllocatorImpl::Reset()
 {
+	char str[256];
+    sprintf_s(str, "Reset Command Pool %p\n", (void*)m_Pool);
+	OutputDebugStringA(str);
     m_Device.resetCommandPool(m_Pool);
 }

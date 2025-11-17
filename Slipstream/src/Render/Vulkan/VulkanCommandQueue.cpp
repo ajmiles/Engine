@@ -37,6 +37,10 @@ Waitable VulkanCommandQueueImpl::ExecuteCommandList(CommandList& commandList, ui
         waitSemaphoreInfo.setSemaphore(static_cast<VulkanFenceImpl*>(waitables[i].fence.m_Impl.get())->m_Semaphore);
         waitSemaphoreInfo.setValue(waitables[i].value);
 
+        char str[256];
+        std::snprintf(str, 256, "ExecuteCommandList Wait on Semaphore %p\n", (void*)&static_cast<VulkanFenceImpl*>(waitables[i].fence.m_Impl.get())->m_Semaphore);
+        OutputDebugStringA(str);
+
         waitSemaphores.emplace_back(waitSemaphoreInfo);
     }
 
@@ -49,9 +53,9 @@ Waitable VulkanCommandQueueImpl::ExecuteCommandList(CommandList& commandList, ui
     submitInfo.setSignalSemaphoreInfoCount(1);
     submitInfo.setPSignalSemaphoreInfos(&signalSemaphoreInfo);
     
-    //char str[256];
-	//std::snprintf(str, 256, "ExecuteCommandList Fence = %p Signal Value: %llu\n", (void*)&m_ProgressFence->m_Semaphore, m_LastSignalledValue);
-    //OutputDebugStringA(str);
+    char str[256];
+    std::snprintf(str, 256, "ExecuteCommandList Signal Semaphore %p. Value %llu\n", (void*)&m_ProgressFence->m_Semaphore, m_LastSignalledValue);
+    OutputDebugStringA(str);
 
     m_Queue.submit2(submitInfo);
 

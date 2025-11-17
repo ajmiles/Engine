@@ -24,6 +24,9 @@ namespace Slipstream::Render
 
         std::shared_ptr<ITextureImpl> m_Impl;
 
+		friend class D3D12GraphicsDeviceImpl;
+		friend class VulkanGraphicsDeviceImpl;
+
 		friend class D3D12SwapChainImpl;
 		friend class VulkanSwapChainImpl;
 

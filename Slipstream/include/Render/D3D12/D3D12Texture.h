@@ -11,5 +11,8 @@ namespace Slipstream::Render
 
     private:
         ID3D12Resource* m_Resource = nullptr;
+
+		friend class D3D12GraphicsDeviceImpl;
+		friend class D3D12CommandListImpl;
     };
 }

@@ -1,9 +1,11 @@
 #include "pch.h"
+#include "Render/Vulkan/VulkanCommon.h"
 #include "Render/Vulkan/VulkanGraphicsDevice.h"
 #include "Render/Vulkan/VulkanCommandQueue.h"
 #include "Render/Vulkan/VulkanCommandList.h"
 #include "Render/Vulkan/VulkanCommandAllocator.h"
 #include "Render/Vulkan/VulkanFence.h"
+#include "Render/Vulkan/VulkanTexture.h"
 #include <stdexcept>
 
 using namespace Slipstream::Render;
@@ -28,8 +30,8 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
         bool validationFound = false;
         for (auto const& layer : availableLayers)
         {
-			OutputDebugStringA(layer.layerName);
-			OutputDebugStringA("\n");
+			//OutputDebugStringA(layer.layerName);
+			//OutputDebugStringA("\n");
             if (std::strcmp(layer.layerName, "VK_LAYER_KHRONOS_validation") == 0)
             {
                 validationFound = true;
@@ -56,7 +58,7 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
 
 	enabledExtensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
     enabledExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-
+	
     vk::InstanceCreateInfo instInfo{};
     instInfo.pApplicationInfo = &appInfo;
     instInfo.enabledLayerCount = static_cast<uint32_t>(enabledLayers.size());
@@ -105,10 +107,12 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
     
 	vk::PhysicalDeviceVulkan13Features features13;
 	features13.synchronization2 = VK_TRUE;
+    features13.dynamicRendering = VK_TRUE;
 	features12.pNext = &features13;
 
     std::vector<const char*> deviceExtensions;
 	deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    deviceExtensions.push_back(VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME);
 
     vk::DeviceCreateInfo deviceCreateInfo({}, totalQueues, queueCreateInfos);
     deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
@@ -129,6 +133,16 @@ VulkanGraphicsDeviceImpl::VulkanGraphicsDeviceImpl(const GraphicsDeviceDesc& des
         m_ComputeQueues.emplace_back(m_device, m_ComputeFamily, i);
     for (uint i = 0; i < desc.NumCopyQueues; ++i)
         m_CopyQueues.emplace_back(m_device, m_CopyFamily, i);
+
+    // Create the RTV descriptor heap
+    {
+        m_RTVDescriptorHeap = new VkImageView[desc.MaxRenderTargetViews];
+        for (uint i = 0; i < desc.MaxRenderTargetViews; ++i)
+        {
+			RenderTargetView rtv = (RenderTargetView)&m_RTVDescriptorHeap[i];
+            m_RTVDescriptorHeapFreeList.push_back(rtv);
+        }
+	}
 }
 
 VulkanGraphicsDeviceImpl::~VulkanGraphicsDeviceImpl()
@@ -210,8 +224,45 @@ CommandAllocator VulkanGraphicsDeviceImpl::CreateCommandAllocator(const CommandA
     return CommandAllocator(static_cast<CommandAllocatorImpl*>(impl));
 }
 
+
 Fence VulkanGraphicsDeviceImpl::CreateFence(const FenceDesc& desc)
 {
     std::shared_ptr<VulkanFenceImpl> impl = std::make_shared<VulkanFenceImpl>(desc, m_device, vk::SemaphoreType::eTimeline);
     return Fence(impl);
+}
+
+
+RenderTargetView VulkanGraphicsDeviceImpl::CreateRenderTargetView(const RenderTargetViewDesc& desc)
+{
+	// Enter critical section
+	std::lock_guard<std::mutex> lock(m_CriticalSection);
+
+    if (m_RTVDescriptorHeapFreeList.empty())
+        throw std::runtime_error("No free RTV descriptors available");
+
+    RenderTargetView rtv = m_RTVDescriptorHeapFreeList.back();
+    m_RTVDescriptorHeapFreeList.pop_back();
+
+	VkImageView* vkRtv = (VkImageView*)rtv;
+
+	// Create the VkImageView for the texture
+	vk::ImageViewCreateInfo viewInfo = {};
+	viewInfo.image = static_cast<VulkanTextureImpl*>(desc.Texture->m_Impl.get())->m_Image;
+	viewInfo.viewType = vk::ImageViewType::e2D;
+	viewInfo.format = ToVulkanType(desc.Format);
+    viewInfo.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+
+	*vkRtv = m_device.createImageView(viewInfo);
+
+    return rtv;
+}
+
+void VulkanGraphicsDeviceImpl::DestroyRenderTargetView(const RenderTargetView rtv)
+{
+    // Enter critical section
+    std::lock_guard<std::mutex> lock(m_CriticalSection);
+    
+	VkImageView* vkRtv = (VkImageView*)rtv;
+    m_device.destroyImageView(*vkRtv);
+	m_RTVDescriptorHeapFreeList.push_back(rtv);
 }

@@ -26,7 +26,7 @@ namespace Slipstream::Render
         std::vector<vk::PresentModeKHR> presentModes =
             physicalDevice.getSurfacePresentModesKHR(m_Surface);
 
-        vk::SurfaceFormatKHR surfaceFormat = formats[1];
+        vk::SurfaceFormatKHR surfaceFormat = formats[3];
         vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo;
         vk::Extent2D extent = capabilities.currentExtent;
         uint32_t imageCount = capabilities.minImageCount;
@@ -43,6 +43,7 @@ namespace Slipstream::Render
         swapchainInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
         swapchainInfo.presentMode = presentMode;
         swapchainInfo.clipped = VK_TRUE;
+		//swapchainInfo.flags = vk::SwapchainCreateFlagBitsKHR::eMutableFormat;
 
         m_SwapChain = m_Device.createSwapchainKHR(swapchainInfo);
 
@@ -66,21 +67,42 @@ namespace Slipstream::Render
     SwapChainContext VulkanSwapChainImpl::BeginRendering()
     {
         // We need to throttle the CPU to make sure the next semaphore has been signalled
-        m_SwapChainFences[m_NextSemaphoreIndex].WaitOnCPU();
+        int firstFreeSemaphoreIndex = -1;
+
+        for (int i = 0; i < m_BufferCount; ++i)
+        {
+			// Find the first semaphore that is not in use
+            if(m_SwapChainFences[i].HasCompleted())
+            {
+                firstFreeSemaphoreIndex = i;
+                break;
+			}
+        }
+
+        if(firstFreeSemaphoreIndex == -1)
+        {
+            // All semaphores are in use; wait for the next one to become free
+			// TODO: Wait on the oldest semaphore instead of the first one?
+            char str[256];
+			std::snprintf(str, sizeof(str), "Waiting on SwapChain Fence %p. Value %llu\n", (void*)&static_cast<VulkanFenceImpl*>(m_SwapChainFences[0].fence.m_Impl.get())->m_Semaphore, m_SwapChainFences[0].value);
+			OutputDebugStringA(str);
+            m_SwapChainFences[0].WaitOnCPU();
+            firstFreeSemaphoreIndex = 0;
+		}
 
         vk::Result res;
         uint32_t imageIndex;
-        std::tie(res, imageIndex) = m_Device.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_SwapChainAcquireSemaphores[m_NextSemaphoreIndex]->m_Semaphore);
+        std::tie(res, imageIndex) = m_Device.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_SwapChainAcquireSemaphores[firstFreeSemaphoreIndex]->m_Semaphore);
 
-        //char str[256];
-		//std::snprintf(str, sizeof(str), "VulkanSwapChainImpl::BeginRendering() - Acquired Image Index: %u, m_NextSemaphoreIndex = %u\n", imageIndex, m_NextSemaphoreIndex);
-        //OutputDebugStringA(str);
+        char str[256];
+		std::snprintf(str, sizeof(str), "Acquire Using Semaphore %p\n", (void*)&m_SwapChainAcquireSemaphores[firstFreeSemaphoreIndex]->m_Semaphore);
+        OutputDebugStringA(str);
 
         SwapChainContext context;
-        context.AcquireWaitable = Waitable(Fence(m_SwapChainAcquireSemaphores[m_NextSemaphoreIndex]), 0xFFFFFFFF);
+        context.AcquireWaitable = Waitable(Fence(m_SwapChainAcquireSemaphores[firstFreeSemaphoreIndex]), 0xFFFFFFFF);
         context.BackBufferIndex = imageIndex;
 
-        m_NextSemaphoreIndex = (m_NextSemaphoreIndex + 1) % m_BufferCount;
+        //m_NextSemaphoreIndex = (m_NextSemaphoreIndex + 1) % m_BufferCount;
 
         return context;
     }

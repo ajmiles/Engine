@@ -10,6 +10,12 @@ namespace Slipstream::Render
         VulkanFenceImpl(const FenceDesc& desc, vk::Device device, vk::SemaphoreType semaphoreType);
         ~VulkanFenceImpl() override;
 
+        bool HasCompleted(uint64_t value) const override
+        {
+			uint64_t currentValue = m_Device.getSemaphoreCounterValue(m_Semaphore);
+			return (currentValue >= value);
+        }
+
         void WaitUntilCompleted(uint64_t value) const override
         {
             //char str[256];
@@ -19,7 +25,7 @@ namespace Slipstream::Render
             vk::SemaphoreWaitInfo waitInfo;
             waitInfo.setSemaphores(m_Semaphore);
             waitInfo.setValues(value);
-            vk::Result res = m_Device.waitSemaphores(waitInfo, UINT64_MAX);
+            m_Device.waitSemaphores(waitInfo, UINT64_MAX);
 
 			//std::snprintf(str, sizeof(str), "Semaphore Addr = %p, VulkanFenceImpl::WaitUntilCompleted(%llu) - Completed. Result: %d\n", (void*)&m_Semaphore, value, static_cast<int>(res));
 			//OutputDebugStringA(str);

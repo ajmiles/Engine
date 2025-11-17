@@ -1,6 +1,6 @@
 #pragma once
 #include "Render/API/Texture.h"
-#include "Render/API/Constants.h"
+#include "Render/API/SlipstreamRender.h"
 
 namespace Slipstream::Render 
 {
