@@ -8,6 +8,18 @@ namespace Slipstream::Render
 {
 	class VulkanTextureImpl;
 
+    struct PerFrameContext
+    {
+        vk::Semaphore AcquireSemaphore;
+        vk::Semaphore PresentSemaphore;
+        Waitable FrameCompleteWaitable;
+
+        bool IsFrameComplete() const
+        {
+            return FrameCompleteWaitable.HasCompleted();
+        }
+    };
+
     class VulkanSwapChainImpl : public ISwapChainImpl
     {
     public:
@@ -16,24 +28,20 @@ namespace Slipstream::Render
 
         SwapChainContext BeginRendering() override;
 
-		Texture GetBackBufferTexture(uint index) override;
+        Texture GetBackBufferTexture(uint index) override;
+
+        //void Present(uint index) override;
 
     private:
         vk::Device       m_Device;
         vk::SurfaceKHR   m_Surface;
         vk::SwapchainKHR m_SwapChain;
 
-		//vk::Image 	                    m_SwapChainImages[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
 		std::shared_ptr<VulkanTextureImpl>  m_SwapChainImages[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS] = { nullptr };
 
-        std::shared_ptr<VulkanFenceImpl> m_SwapChainAcquireSemaphores[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
-        std::shared_ptr<VulkanFenceImpl> m_SwapChainPresentSemaphores[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
+        PerFrameContext                     m_PerFrameContexts[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
 
-		// Indicates that a buffer is available for rendering.
-        Waitable                         m_SwapChainFences[SLIPSTREAM_RENDER_MAX_SWAPCHAIN_BUFFERS];
-
-        //uint                             m_NextSemaphoreIndex = 0;
-        uint                             m_BufferCount = 0;
+        uint                                m_BufferCount = 0;
 
         friend class VulkanCommandQueueImpl;
     };

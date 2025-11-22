@@ -80,7 +80,7 @@ SwapChainContext D3D12SwapChainImpl::BeginRendering()
 	m_FrameEndWaitables[m_SwapChain->GetCurrentBackBufferIndex()].WaitOnCPU();
 
     SwapChainContext context;
-    context.AcquireWaitable = Waitable(Fence(), 0); // No fence for D3D12 swap chain acquire.
+    //context.AcquireWaitable = Waitable(Fence(), 0); // No fence for D3D12 swap chain acquire.
     context.BackBufferIndex = m_SwapChain->GetCurrentBackBufferIndex();
     return context;
 }

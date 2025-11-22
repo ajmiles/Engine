@@ -6,7 +6,7 @@
 using namespace Slipstream::System;
 using namespace Slipstream::Render;
 
-static const uint NUM_FRAMES = 2;
+static const uint NUM_BACKBUFFERS = 2;
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -19,17 +19,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     GraphicsDevice graphicsDevice(gdDesc);
     CommandQueue graphicsQueue = graphicsDevice.GetCommandQueue(CommandQueueType::Graphics, 0);
 
-    SwapChainDesc scDesc = { graphicsQueue, window.GetHandle(), NUM_FRAMES };
+    SwapChainDesc scDesc = { graphicsQueue, window.GetHandle(), NUM_BACKBUFFERS };
     SwapChain swapChain = graphicsDevice.CreateSwapChain(scDesc);
 
-    CommandAllocator commandAllocators[NUM_FRAMES] =
+    CommandAllocator commandAllocators[NUM_BACKBUFFERS] =
     {   graphicsDevice.CreateCommandAllocator({ CommandAllocatorType::Graphics }),
         graphicsDevice.CreateCommandAllocator({ CommandAllocatorType::Graphics })
     };
 
-	RenderTargetView rtvs[NUM_FRAMES];
+	RenderTargetView rtvs[NUM_BACKBUFFERS];
 
-    for(int i = 0; i < NUM_FRAMES; ++i)
+    for(int i = 0; i < NUM_BACKBUFFERS; ++i)
     {
         Texture backBufferTexture = swapChain.GetBackBufferTexture(i);
         RenderTargetViewDesc rtvDesc = { &backBufferTexture, ResourceFormat::R8G8B8A8_UNORM_SRGB };
@@ -76,12 +76,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
             swapChain_UndefinedToRTV.Texture.Texture = &backBufferTexture;
             commandList.Barrier(1, &swapChain_UndefinedToRTV);
 
-			RenderingInfo renderingInfo = { 1, targetInfos, { 0, 0, windowRect.Width, windowRect.Height } };
+            RenderingInfo renderingInfo = { 1, targetInfos, { 0, 0, windowRect.Width, windowRect.Height } };
             targetInfos[0].RTV = rtvs[swapChainContext.BackBufferIndex];
-
-			commandList.BeginPass(renderingInfo);
-            // Do rendering stuff here
-			commandList.EndPass();
+            
+            commandList.BeginPass(renderingInfo);
+            commandList.EndPass();
 
             swapChain_RTVToPresent.Texture.Texture = &backBufferTexture;
             commandList.Barrier(1, &swapChain_RTVToPresent);

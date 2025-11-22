@@ -68,6 +68,9 @@ Waitable VulkanCommandQueueImpl::ExecuteCommandList(CommandList& commandList, ui
 void VulkanCommandQueueImpl::Present(SwapChain& swapChain, PresentDesc& desc)
 {
 	VulkanSwapChainImpl* impl = static_cast<VulkanSwapChainImpl*>(swapChain.m_Impl);
+
+    //impl->Present(desc);
+    /*
     VulkanFenceImpl* waitFenceImpl = static_cast<VulkanFenceImpl*>(desc.SwapChainWaitable.fence.m_Impl.get());
 
     vk::Semaphore presentSemaphore = impl->m_SwapChainPresentSemaphores[desc.BackBufferIndex]->m_Semaphore;
@@ -110,5 +113,5 @@ void VulkanCommandQueueImpl::Present(SwapChain& swapChain, PresentDesc& desc)
     presentInfo.setPWaitSemaphores((const vk::Semaphore*)&presentSemaphore);
     presentInfo.setWaitSemaphoreCount(1);
 
-	m_Queue.presentKHR(presentInfo);
+	m_Queue.presentKHR(presentInfo);*/
 }

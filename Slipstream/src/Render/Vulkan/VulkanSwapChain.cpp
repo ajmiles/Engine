@@ -51,8 +51,15 @@ namespace Slipstream::Render
 
         for (uint i = 0; i < desc.BufferCount; ++i)
         {
-            m_SwapChainAcquireSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
-            m_SwapChainPresentSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
+            //m_SwapChainAcquireSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
+            //m_SwapChainPresentSemaphores[i] = std::make_shared<VulkanFenceImpl>(FenceDesc{}, device, vk::SemaphoreType::eBinary);
+            vk::SemaphoreTypeCreateInfo semaphoreTypeInfo = { vk::SemaphoreType::eBinary, 0 };
+            vk::SemaphoreCreateInfo semaphoreInfo = {};
+            semaphoreInfo.pNext = &semaphoreTypeInfo;
+
+            m_PerFrameContexts[i].AcquireSemaphore = device.createSemaphore(semaphoreInfo);
+            m_PerFrameContexts[i].PresentSemaphore = device.createSemaphore(semaphoreInfo);
+
             m_SwapChainImages[i] = std::make_shared<VulkanTextureImpl>(swapChainImages[i]);
         }
     }
@@ -66,43 +73,43 @@ namespace Slipstream::Render
 
     SwapChainContext VulkanSwapChainImpl::BeginRendering()
     {
-        // We need to throttle the CPU to make sure the next semaphore has been signalled
-        int firstFreeSemaphoreIndex = -1;
-
-        for (int i = 0; i < m_BufferCount; ++i)
+        for (uint i = 0; i < m_BufferCount; ++i)
         {
-			// Find the first semaphore that is not in use
-            if(m_SwapChainFences[i].HasCompleted())
+            bool complete = m_PerFrameContexts[i].IsComplete();
+            char str[256];
+            sprintf_s(str, sizeof(str), "Semaphore %p is %s\n", (void*)&m_PerFrameContexts[i].AcquireSemaphore);
+            OutputDebugStringA(str);
+        }
+
+        // Find the first free semaphore
+        int firstFreeSemaphoreIndex = 0;
+
+        for (uint i = 0; i < m_BufferCount; ++i)
+        {
+            if (m_PerFrameContexts[i].IsComplete())
             {
                 firstFreeSemaphoreIndex = i;
                 break;
-			}
+            }
         }
 
-        if(firstFreeSemaphoreIndex == -1)
-        {
-            // All semaphores are in use; wait for the next one to become free
-			// TODO: Wait on the oldest semaphore instead of the first one?
-            char str[256];
-			std::snprintf(str, sizeof(str), "Waiting on SwapChain Fence %p. Value %llu\n", (void*)&static_cast<VulkanFenceImpl*>(m_SwapChainFences[0].fence.m_Impl.get())->m_Semaphore, m_SwapChainFences[0].value);
-			OutputDebugStringA(str);
-            m_SwapChainFences[0].WaitOnCPU();
-            firstFreeSemaphoreIndex = 0;
-		}
+        // All semaphores are in use; wait for the next one to become free
+        // TODO: Wait on the oldest semaphore instead of the first one?
+        //char str[256];
+        //std::snprintf(str, sizeof(str), "Waiting on SwapChain Fence %p. Value %llu\n", (void*)&static_cast<VulkanFenceImpl*>(m_SwapChainFences[0].fence.m_Impl.get())->m_Semaphore, m_SwapChainFences[0].value);
+        //OutputDebugStringA(str);
+        
 
         vk::Result res;
         uint32_t imageIndex;
-        std::tie(res, imageIndex) = m_Device.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_SwapChainAcquireSemaphores[firstFreeSemaphoreIndex]->m_Semaphore);
+        std::tie(res, imageIndex) = m_Device.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_PerFrameContexts[firstFreeSemaphoreIndex].AcquireSemaphore);
 
         char str[256];
-		std::snprintf(str, sizeof(str), "Acquire Using Semaphore %p\n", (void*)&m_SwapChainAcquireSemaphores[firstFreeSemaphoreIndex]->m_Semaphore);
+        std::snprintf(str, sizeof(str), "Acquire Using Semaphore %p\n", (void*)&m_PerFrameContexts[firstFreeSemaphoreIndex].AcquireSemaphore);
         OutputDebugStringA(str);
 
         SwapChainContext context;
-        context.AcquireWaitable = Waitable(Fence(m_SwapChainAcquireSemaphores[firstFreeSemaphoreIndex]), 0xFFFFFFFF);
         context.BackBufferIndex = imageIndex;
-
-        //m_NextSemaphoreIndex = (m_NextSemaphoreIndex + 1) % m_BufferCount;
 
         return context;
     }

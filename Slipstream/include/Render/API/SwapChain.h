@@ -15,7 +15,7 @@ namespace Slipstream::Render
 
     struct SwapChainContext
     {
-        Waitable AcquireWaitable;
+        //uint64_t WaitHandle;
         uint BackBufferIndex = 0;
     };
 
@@ -26,6 +26,7 @@ namespace Slipstream::Render
 
         virtual SwapChainContext BeginRendering() = 0;
 		virtual Texture GetBackBufferTexture(uint index) = 0;
+        //virtual void Present(const PresentDesc& desc) = 0;
     };
 
     // Non-owning handle; cannot be user-constructed.
